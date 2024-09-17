@@ -4,18 +4,34 @@
 \alias{run_gen_deterministic}
 \title{Run generalized deterministic compartmental model}
 \usage{
-run_gen_deterministic(init_vals, times, comp_names, trans_matrix)
+
+run_gen_deterministic(
+  init_vals,
+  times,
+  comp_names,
+  trans_matrix,
+  intervention_start_time = NULL,
+  intervention_end_time = NULL,
+  modifier_matrix = NULL
+)
 }
 \arguments{
 \item{init_vals}{the starting values for populations in each compartment}
 
-\item{times}{vector (type: double) containing time steps to run the model
-over}
+\item{times}{vector of time steps to run the model over}
 
 \item{comp_names}{names of the compartments}
 
 \item{trans_matrix}{matrix of transition rates between each of the
 compartments}
+
+
+\item{intervention_start_time}{time at which intervention will start}
+
+\item{intervention_end_time}{time at which intervention will end}
+
+\item{modifier_matrix}{value to be multiplied against transition matrix}
+
 }
 \value{
 data frame with columns for time and each compartment
@@ -42,9 +58,26 @@ transition_mtx <- matrix(
   byrow = TRUE,
   dimnames = list(compartment_nms, compartment_nms)
 )
+start <- 25
+end <- 30
+modify <- 0.5
+mod_mat <- matrix(
+  c(
+    1, 0.5, 1, 1, 1,
+    1, 0.5, 0.25, 1, 1,
+    1, 1, 0.25, .1, 1,
+    1, 1, 1, .1, 1,
+    1, 1, 1, 1, 1
+  ),
+  nrow = length(compartment_nms),
+  byrow = TRUE,
+  dimnames = list(compartment_nms, compartment_nms)
+)
 modelout <- run_gen_deterministic(
   initial_vals, time_seq, compartment_nms,
-  transition_mtx
+  transition_mtx,
+  start, end,
+  mod_mat
 )
 }
 }
