@@ -1,5 +1,5 @@
 ---
-title: "basic-generalized-models"
+title: "Basic Generalized Models"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{basic-generalized-models}
@@ -18,14 +18,14 @@ knitr::opts_chunk$set(
 library(compModels)
 ```
 
-# Basic Compartmental Models
+## Overview
 compModels expands the basic functionality demonstrated in the basic-sir
 vignette for determintistic and stochastic compartmental models to encompss
 generalized compartmental models in which the user defines any number (and name)
 of compartments and transtions.
 
 
-# Generalized Deterministic Model
+## Generalized Deterministic Model
 The [compModels::run_gen_deterministic()] function allows users to run a basic
 deterministic compartmental model. The user specifies the initial values and
 compartment names for each of the states, a vector of times to
@@ -87,13 +87,13 @@ modelout <- run_gen_deterministic(
 )
 ```
 
-```{r gen deterministic plot}
+```{r gen deterministic plot, fig.dim = c(6,4)}
 plot_determin_model(modelout)
 ```
 
 
-# Generalized Stochastic Model
-# Gillespie Algorithm
+## Generalized Stochastic Model
+### Gillespie Algorithm
 The [compModels::run_gen_stochastic()] function allows users to run a basic
 stochastic susceptible-infected-recovered (SIR) compartmental model using the
 Gillespie Algorithm in [GillespieSSA::ssa.d]. The user specifies values for
@@ -149,7 +149,7 @@ modelout2 <- run_gen_stochastic(
 )
 ```
 
-```{r gen stochastic gillespie plot}
+```{r gen stochastic gillespie plot, fig.dim = c(6,4)}
 # Plot will default to plotting "i" compartment as second argument to the
 # function. NB: will need to rename to plot other compartments or for models
 # with other names for the infected compartmernt (eg. i1, i2, etc).

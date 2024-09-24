@@ -1,5 +1,5 @@
 ---
-title: "basic-sir"
+title: "Basic SIR Models"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{basic-sir}
@@ -19,8 +19,8 @@ library(compModels)
 ```
 
 
-# Deterministic Models
-## Basic Deterministic SIR
+## Deterministic Models
+### Basic Deterministic SIR
 The [compModels::run_sir()] function allows users to run a basic deterministic
 susceptible-infected-recovered (SIR) compartmental model. The user specifies
 the initial values for each of the states (s, i, r), a vector of times to
@@ -41,11 +41,11 @@ modelout <- run_sir(
 )
 ```
 
-```{r deterministic plot}
+```{r deterministic plot, fig.dim = c(6,4)}
 plot_determin_model(modelout)
 ```
 
-## Deterministic SIR with Single Intervention
+### Deterministic SIR with Single Intervention
 The [compModels::run_sir_intervention()] function allows users to run a basic
 deterministic susceptible-infected-recovered (SIR) compartmental model with a
 single intervention. As with [compModels::run_sir()], the user specifies
@@ -75,7 +75,7 @@ modelout2 <- run_sir_intervention(
 )
 ```
 
-```{r deterministic int plot}
+```{r deterministic int plot, fig.dim = c(6,4)}
 plot_determin_model(modelout2,
   show_intervention_period = TRUE,
   intervention_period = c(10, 20)
@@ -83,8 +83,8 @@ plot_determin_model(modelout2,
 ```
 
 
-# Stochastic Models
-## Basic Stochastic SIR - Gillespie Algorithm
+## Stochastic Models
+### Basic Stochastic SIR - Gillespie Algorithm
 The [compModels::run_sir_stochastic()] function allows users to run a basic
 stochastic susceptible-infected-recovered (SIR) compartmental model using the
 Gillespie Algorithm in [GillespieSSA::ssa.d]. The user specifies values for the
@@ -111,7 +111,7 @@ modelout3 <- run_sir_stochastic(
 )
 ```
 
-```{r stochastic gillespie plot}
+```{r stochastic gillespie plot, fig.dim = c(6,4)}
 # Plot will default to plotting "i" compartment as second argument to the
 # function. Additionally, default time_var is "t" so if output variable is
 # 'time', this will need to be specified. GillespieSSA returns t. NB: will need
@@ -120,7 +120,7 @@ modelout3 <- run_sir_stochastic(
 plot_stoch_model(modelout3)
 ```
 
-## Basic Stochastic SIR - Adaptive Tau Leaping Algorithm
+### Basic Stochastic SIR - Adaptive Tau Leaping Algorithm
 The [compModels::run_sir_stochastic_tau()] function allows users to run a basic
 stochastic susceptible-infected-recovered (SIR) compartmental model using
 adaptive tau leaping in [adaptivetau::ssa.exact()]. The user specifies values
@@ -145,7 +145,7 @@ modelout4 <- run_sir_stochastic_tau(
 )
 ```
 
-```{r stochastic tau plot}
+```{r stochastic tau plot, fig.dim = c(6,4)}
 # Plot will default to plotting "i" compartment as second argument to the
 # function. Additionally, default time_var is "t" so if output variable is
 # 'time', this will need to be specified. adaptivetau returns 'time'.
@@ -155,7 +155,7 @@ plot_stoch_model(modelout4, time_var = "time")
 ```
 
 
-# Generalized Compartmental Models
+## Generalized Compartmental Models
 compModels expands this basic functionality to generalized compartmental models
 in which the user defines any number (and name) of compartments and transtions.
 See basic-generalized-models vignette for more information.
