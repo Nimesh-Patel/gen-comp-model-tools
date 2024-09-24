@@ -113,8 +113,10 @@ modelout3 <- run_sir_stochastic(
 
 ```{r stochastic gillespie plot}
 # Plot will default to plotting "i" compartment as second argument to the
-# function. NB: will need to rename to plot other compartments or for models
-# with other names for the infected compartmernt (eg. i1, i2, etc).
+# function. Additionally, default time_var is "t" so if output variable is
+# 'time', this will need to be specified. GillespieSSA returns t. NB: will need
+#  to rename to plot other compartments or for models with other names for the
+# infected compartment (eg. i1, i2, etc).
 plot_stoch_model(modelout3)
 ```
 
@@ -145,9 +147,11 @@ modelout4 <- run_sir_stochastic_tau(
 
 ```{r stochastic tau plot}
 # Plot will default to plotting "i" compartment as second argument to the
-# function. NB: will need to rename to plot other compartments or for models
-# with other names for the infected compartmernt (eg. i1, i2, etc).
-plot_stoch_model(modelout4)
+# function. Additionally, default time_var is "t" so if output variable is
+# 'time', this will need to be specified. adaptivetau returns 'time'.
+#  NB: will need to rename to plot other compartments or for models with other
+#  names for the infected compartment (eg. i1, i2, etc).
+plot_stoch_model(modelout4, time_var = "time")
 ```
 
 
