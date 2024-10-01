@@ -159,3 +159,23 @@ plot_stoch_model(modelout4, time_var = "time")
 compModels expands this basic functionality to generalized compartmental models
 in which the user defines any number (and name) of compartments and transtions.
 See basic-generalized-models vignette for more information.
+
+
+## Estimating the initial growth rate
+compModels has some helper functions to allow the user to estimate the initial
+growth rate, r, for an outbreak. The estimate for r is found by regressing the
+log of the cumulative incidence on time. The helper functions
+[compModels::calculate_cuminf()] and
+[compModels::calculate_initial_growth_rate()] are used on an example of a
+deterministic model output in a single data frame, and stochastic model output
+in a list of data frames.
+Note: This r can then be used to estimate R0 with the relationship R0 = V*r + 1
+where V is the serial interval.
+```{r estimate growth}
+# Basic Deterministic SIR Model (no intervention)
+calculate_initial_growth_rate(modelout, time_var = "time", i_var = "i")
+
+# Basic Stochastic SIR Model (Gillespie Algorithm) with 10 simulations,
+# no intervention
+calculate_initial_growth_rate(modelout3, time_var = "t", i_var = "i")
+```
