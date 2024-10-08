@@ -22,6 +22,8 @@ Imports:
     dplyr,
     ggplot2,
     GillespieSSA,
+    gridExtra,
+    Matrix,
     rlang,
     tidyr
 VignetteBuilder: knitr

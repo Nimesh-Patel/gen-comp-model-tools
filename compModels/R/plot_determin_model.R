@@ -11,8 +11,6 @@
 #' (type: numeric) with the start and end time of an intervention
 #' @return ggplot2 plot of compartmental model output
 #' @import ggplot2
-#' @importFrom rlang .data
-#' @name .data
 #' @rdname plot_determin_model
 #' @export
 #' @examples
@@ -38,49 +36,104 @@
 #'   show_intervention_period = TRUE,
 #'   intervention_period = c(10, 20)
 #' )
+#'
+#' init_vals_base <- c(s = 99000, e = 0, i = 10000, r = 0)
+#' comp_names_base <- c("s", "e", "i", "r")
+#' beta <- .9 # transmission
+#' sigma <- .1 # progression E->I
+#' gamma <- 0.05 # recovery
+#' trans_matrix_base <- matrix(
+#'   c(
+#'     -beta, 0, 0, 0,
+#'     beta, -sigma, 0, 0,
+#'     0, sigma, -gamma, 0,
+#'     0, 0, gamma, 0
+#'   ),
+#'   nrow = length(comp_names_base), byrow = TRUE,
+#'   dimnames = list(comp_names_base, comp_names_base)
+#' )
+#' times <- seq(0, 100, by = 1)
+#' age_grps_vector <- c("child", "adult", "elderly")
+#' vacc_status_vector <- c("vaccinated", "unvaccinated")
+#' gender_cat_vector <- c("male", "female")
+#'
+#' modelout3 <- run_gen_deterministic(
+#'   init_vals_base = init_vals_base,
+#'   times = times,
+#'   comp_names_base = comp_names_base,
+#'   trans_matrix_base = trans_matrix_base,
+#'   subgroups_list =
+#'     list(
+#'       age_groups = age_grps_vector,
+#'       vaccination_statuses = vacc_status_vector,
+#'       gender_categories = gender_cat_vector
+#'     ),
+#'   intervention_start_time = NULL,
+#'   intervention_end_time = NULL,
+#'   modifier_function = NULL
+#' )
+#' plot_determin_model(modelout3,
+#'   stratify_by = c("child", "adult", "elderly")
+#' )
 #' }
 plot_determin_model <- function(output, stratify_by = NULL,
                                 show_intervention_period = FALSE,
                                 intervention_period = NULL) {
-  # rrlang::.data used to address R package notes for no visible binding
+  out_long <- as.data.frame(output) |>
+    tidyr::pivot_longer(-time, names_to = "variable", values_to = "value")
+  plot_list <- list()
 
-  out_long <- as.data.frame(
-    tidyr::pivot_longer(as.data.frame(output), -.data$time) |>
-      dplyr::rename(variable = .data$name)
-  )
-
-  if (!is.null(stratify_by)) {
-    # Filter rows where variable names contain the stratify_by value
-    out_long <- out_long[grepl(stratify_by, out_long$variable), ]
-  }
-
-  if (show_intervention_period) {
-    ggplot(
-      out_long,
-      aes(x = .data$time, y = .data$value, colour = .data$variable)
-    ) +
-      geom_line(lwd = 2) +
-      xlab("Time") +
-      ylab("Number") +
-      labs(color = "State") +
-      theme_classic() +
-      geom_vline(
-        xintercept = intervention_period[1],
-        linetype = "longdash"
+  if (!is.null(stratify_by) && length(stratify_by) > 0) {
+    for (stratum in stratify_by) {
+      pattern <- paste0("(^|_)", stratum, "($|_)")
+      filtered_data <- subset(out_long, grepl(pattern, variable))
+      p <- ggplot(
+        filtered_data,
+        aes(x = time, y = value, color = variable)
       ) +
-      geom_vline(
-        xintercept = intervention_period[2],
-        linetype = "longdash"
-      )
+        geom_line() +
+        xlab("Time") +
+        ylab("Number") +
+        labs(colour = "Compartment") +
+        theme_classic()
+
+      if (show_intervention_period && !is.null(intervention_period)) {
+        p <- p +
+          geom_vline(
+            xintercept = intervention_period[1],
+            linetype = "longdash",
+            color = "blue"
+          ) +
+          geom_vline(
+            xintercept = intervention_period[2],
+            linetype = "longdash",
+            color = "red"
+          )
+      }
+      plot_list[[stratum]] <- p
+    }
+    do.call(gridExtra::grid.arrange, c(plot_list, ncol = 1))
   } else {
-    ggplot(
+    p <- ggplot(
       out_long,
-      aes(x = .data$time, y = .data$value, colour = .data$variable)
+      aes(x = time, y = value, color = variable)
     ) +
-      geom_line(lwd = 2) +
+      geom_line() +
       xlab("Time") +
       ylab("Number") +
-      labs(color = "State") +
+      labs(colour = "Compartment") +
       theme_classic()
+    if (show_intervention_period && !is.null(intervention_period)) {
+      p <- p + geom_vline(
+        xintercept = intervention_period[1],
+        linetype = "longdash",
+        color = "blue"
+      ) +
+        geom_vline(
+          xintercept = intervention_period[2],
+          linetype = "longdash", color = "red"
+        )
+    }
+    return(p)
   }
 }

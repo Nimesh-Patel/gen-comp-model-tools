@@ -23,4 +23,5 @@ list object with columns for time and each compartment
 Helper function to calculate modified change rates for in and out flows in
 a generalized compartmental model with intervention
 \code{\link[=run_gen_deterministic]{run_gen_deterministic()}}.
+Helper function \code{\link[=apply_modifiers]{apply_modifiers()}} is used during interventions
 }
