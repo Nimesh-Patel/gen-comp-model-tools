@@ -1,0 +1,39 @@
+deterministic:
+  init: {s: 99999, i: 1, r: 0}
+  time: {start: 0.1, end: 100, by: 0.1}
+  parms:
+    beta: 0.5
+    gamma: 0.1
+  intervention_start_time: 5
+  intervention_end_time: 15
+  intervention_impact: 0.4
+
+stochastic:
+  beta: 0.001
+  gamma: 0.1
+  s0: 499
+  i0: 100
+  r0: 0
+  n_pop: 500
+  n_timesteps: 100
+  propensity_fns:
+    - beta*s*i
+    - gamma*i
+  change_matrix:
+    - [-1, 0]
+    - [+1, -1]
+    - [0, +1]
+  n_sims: 10
+
+stochastic_tau:
+  beta: 0.00001
+  gamma: 0.1
+  s0: 99999
+  i0: 1
+  r0: 0
+  n_pop: 10000
+  n_timesteps: 100
+  transitions:
+    - [-1, 1]
+    - [-1, +1]
+  n_sims: 10

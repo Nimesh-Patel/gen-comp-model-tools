@@ -10,7 +10,7 @@ run_sir_stochastic_tau(
   s0,
   i0,
   r0,
-  n,
+  n_pop,
   n_timesteps,
   transitions,
   n_sims
@@ -27,7 +27,7 @@ run_sir_stochastic_tau(
 
 \item{r0}{initial count of recovereds}
 
-\item{n}{population size}
+\item{n_pop}{population size}
 
 \item{n_timesteps}{number of time steps}
 

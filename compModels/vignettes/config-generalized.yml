@@ -1,0 +1,63 @@
+deterministic:
+  initial_vals: {A: 99999, B: 1, C: 0, D: 0, E: 0}
+  time_seq: {start: 0.1, end: 100, by: 0.1}
+  compartment_nms: [A, B, C, D, E]
+  transition_mtx:
+    - [-0.1, 0.1, 0, 0, 0]
+    - [0, -0.1, 0.1, 0, 0]
+    - [0, 0, -0.1, 0.1, 0]
+    - [0, 0, 0, -0.1, 0.1]
+    - [0.1, 0, 0, 0, -0.1]
+  intervention_start_time: 5
+  intervention_end_time: 15
+  modify: 0.5
+  mod_mat:
+    - [1, 0.5, 1, 1, 1]
+    - [1, 0.5, 0.25, 1, 1]
+    - [1, 1, 0.25, .1, 1]
+    - [1, 1, 1, .1, 1]
+    - [1, 1, 1, 1, 1]
+
+deterministic_stratify:
+  init_vals_base: {s: 99000, e: 0, i: 10000, r: 0}
+  times: {start: 0.1, end: 100, by: 0.1}
+  comp_names_base: [s, e, i, r]
+  beta: 0.9
+  sigma: 0.1
+  gamma: 0.05
+  trans_matrix_base:
+    - [0.9, 0, 0, 0,]
+    - [0.9, -0.1, 0, 0]
+    - [0, 0.1, -0.05, 0]
+    - [0, 0, 0.05, 0]
+  intervention_start_time: 5
+  intervention_end_time: 15
+  single_modifier_value: 1
+  base_size_modifier_mtx:
+    - [1, 0.5, 1, 1, 1]
+    - [1, 0.5, 0.25, 1, 1]
+    - [1, 1, 0.25, .1, 1]
+    - [1, 1, 1, .1, 1]
+  age_grps_vector: ["child", "adult", "elderly"]
+  vacc_status_vector: ["vaccinated", "unvaccinated"]
+  gender_cat_vector: ["male", "female"]
+
+stochastic:
+  init_vals: {s: 990, e: 100, i1: 10, i2: 0, r: 0}
+  beta: 0.001
+  sigma: 0.1
+  gamma: 0.1
+  alpha: 0.05
+  n_timesteps: 100
+  propensity_fns:
+    - "beta * s * i1"
+    - "sigma * e"
+    - "alpha * i1"
+    - "gamma * i2"
+  change_matrix:
+    - [-1, 0, 0, 0]
+    - [+1, -1, 0, 0]
+    - [0, +1, -1, 0]
+    - [0, 0, +1, -1]
+    - [0, 0, 0, +1]
+  n_sims: 10

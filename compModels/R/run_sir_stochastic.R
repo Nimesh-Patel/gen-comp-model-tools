@@ -10,7 +10,7 @@
 #' @param s0 initial count of susceptibles
 #' @param i0 initial count of infecteds
 #' @param r0 initial count of recovereds
-#' @param n population size
+#' @param n_pop population size
 #' @param n_timesteps number of time steps
 #' @param n_sims number of simulations desired
 #' @param propensity_fns provide transition equations as a vector of equations
@@ -29,10 +29,10 @@
 #'   ), 10
 #' )
 #' }
-run_sir_stochastic <- function(beta, gamma, s0, i0, r0, n, n_timesteps,
+run_sir_stochastic <- function(beta, gamma, s0, i0, r0, n_pop, n_timesteps,
                                propensity_fns, change_matrix, n_sims) {
   validate_sir_stoch_input(
-    beta, gamma, s0, i0, r0, n, n_timesteps,
+    beta, gamma, s0, i0, r0, n_pop, n_timesteps,
     method = "GillespieSSA",
     propensity_fns = propensity_fns,
     change_matrix = change_matrix,

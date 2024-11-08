@@ -8,7 +8,7 @@
 #' @param s0 initial count of susceptibles
 #' @param i0 initial count of infecteds
 #' @param r0 initial count of recovereds
-#' @param n population size
+#' @param n_pop population size
 #' @param n_timesteps number of time steps
 #' @param method character name of stochastic method used, default NULL. Example
 #' options include "GillespieSSA" or "adaptivetau"
@@ -39,7 +39,8 @@
 #'   10
 #' )
 #' }
-validate_sir_stoch_input <- function(beta, gamma, s0, i0, r0, n, n_timesteps,
+validate_sir_stoch_input <- function(beta, gamma, s0, i0, r0, n_pop,
+                                     n_timesteps,
                                      method = NULL,
                                      propensity_fns = NULL,
                                      change_matrix = NULL,
@@ -47,7 +48,7 @@ validate_sir_stoch_input <- function(beta, gamma, s0, i0, r0, n, n_timesteps,
                                      n_sims) {
   # Checks on validity of user input
   sapply(
-    X = c("beta", "gamma", "s0", "i0", "r0", "n", "n_timesteps", "n_sims"),
+    X = c("beta", "gamma", "s0", "i0", "r0", "n_pop", "n_timesteps", "n_sims"),
     FUN = function(x) {
       if (!is.numeric(get(x)) | get(x) < 0) {
         stop(x, " must be numeric and non-negative. It is ", get(x))
@@ -90,7 +91,7 @@ validate_sir_stoch_input <- function(beta, gamma, s0, i0, r0, n, n_timesteps,
   if (length(n_timesteps) > 1) {
     stop("times should contain the number of time steps, not a vector of times")
   }
-  if (any(c(s0, i0, r0, n, n_timesteps, n_sims) > .Machine$integer.max)) {
+  if (any(c(s0, i0, r0, n_pop, n_timesteps, n_sims) > .Machine$integer.max)) {
     stop("Initial conditions exceed the maximum integer size.")
   }
   print("Input checks passed")

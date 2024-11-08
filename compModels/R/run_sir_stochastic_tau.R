@@ -10,7 +10,7 @@
 #' @param s0 initial count of susceptibles
 #' @param i0 initial count of infecteds
 #' @param r0 initial count of recovereds
-#' @param n population size
+#' @param n_pop population size
 #' @param n_timesteps number of time steps
 #' @param transitions list object with transition information between states
 #' @param n_sims number of simulations to run
@@ -24,10 +24,10 @@
 #'   10
 #' )
 #' }
-run_sir_stochastic_tau <- function(beta, gamma, s0, i0, r0, n,
+run_sir_stochastic_tau <- function(beta, gamma, s0, i0, r0, n_pop,
                                    n_timesteps, transitions, n_sims) {
   validate_sir_stoch_input(
-    beta, gamma, s0, i0, r0, n, n_timesteps,
+    beta, gamma, s0, i0, r0, n_pop, n_timesteps,
     method = "adaptivetau",
     transitions = transitions,
     n_sims = n_sims

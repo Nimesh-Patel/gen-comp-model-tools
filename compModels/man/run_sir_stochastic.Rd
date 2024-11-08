@@ -10,7 +10,7 @@ run_sir_stochastic(
   s0,
   i0,
   r0,
-  n,
+  n_pop,
   n_timesteps,
   propensity_fns,
   change_matrix,
@@ -28,7 +28,7 @@ run_sir_stochastic(
 
 \item{r0}{initial count of recovereds}
 
-\item{n}{population size}
+\item{n_pop}{population size}
 
 \item{n_timesteps}{number of time steps}
 

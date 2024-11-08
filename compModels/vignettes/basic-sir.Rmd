@@ -34,14 +34,37 @@ plausible bounds. Output from run_sir() can be fed into
 [compModels::plot_determin_model()] to view a plot of the output using ggplot2.
 
 ```{r deterministic}
-modelout <- run_sir(
+modelout0 <- run_sir(
   init = c(s = 1e05 - 1, i = 1, r = 0),
   time = seq(0.1, 100, by = 0.1),
   parms = c(beta = 0.5, gamma = 0.1)
 )
 ```
 
+An alternative way to run this would be to use a configuration (config) file
+to bring in the parameters instead of hard coding them. The file
+config-basic.yml is also in the vignettes directory of this package and
+contains the needed data for this.
+```{r deterministic2}
+config <- yaml::read_yaml("config-basic.yml") # passes package check()
+# full path: compModels/vignettes/config-basic.yml
+
+modelout <- run_sir(
+  init = unlist(config$deterministic$init),
+  time = seq(config$deterministic$time$start,
+    config$deterministic$time$end,
+    by = config$deterministic$time$by
+  ),
+  parms = c(
+    beta = config$deterministic$parms$beta,
+    gamma = config$deterministic$parms$gamma
+  )
+)
+```
+
+
 ```{r deterministic plot, fig.dim = c(6,4)}
+plot_determin_model(modelout0)
 plot_determin_model(modelout)
 ```
 
@@ -63,22 +86,51 @@ run_sir_intervention() can be fed into [compModels::plot_determin_model()] to
  view a plot of the output and intervention period using ggplot2.
 
 ```{r determin int}
+# nolint start
+# Hard coded
+# modelout2 <- run_sir_intervention(
+#   init = c(s = 1e05 - 1, i = 1, r = 0),
+#   time = seq(0.1, 100, by = 0.1),
+#   parms = list(
+#     beta = 0.5, gamma = 0.1,
+#     intervention_start_time = 20,
+#     intervention_end_time = 30,
+#     intervention_impact = 0.3
+#   )
+# )
+# nolint end
+
+# Using config file
 modelout2 <- run_sir_intervention(
-  init = c(s = 1e05 - 1, i = 1, r = 0),
-  time = seq(0.1, 100, by = 0.1),
-  parms = list(
-    beta = 0.5, gamma = 0.1,
-    intervention_start_time = 20,
-    intervention_end_time = 30,
-    intervention_impact = 0.3
+  init = unlist(config$deterministic$init),
+  time = seq(config$deterministic$time$start,
+    config$deterministic$time$end,
+    by = config$deterministic$time$by
+  ),
+  parms = c(
+    beta = config$deterministic$parms$beta,
+    gamma = config$deterministic$parms$gamma,
+    intervention_start_time = config$deterministic$intervention_start_time,
+    intervention_end_time = config$deterministic$intervention_end_time,
+    intervention_impact = config$deterministic$intervention_impact
   )
 )
 ```
 
 ```{r deterministic int plot, fig.dim = c(6,4)}
+# nolint start
+# plot_determin_model(modelout2[, -5],
+#   show_intervention_period = TRUE,
+#   intervention_period = c(20, 30)
+# )
+# nolint end
+
 plot_determin_model(modelout2[, -5],
   show_intervention_period = TRUE,
-  intervention_period = c(20, 30)
+  intervention_period = c(
+    config$intervention_start_time,
+    config$intervention_end_time
+  )
 )
 ```
 
@@ -101,13 +153,29 @@ within plausible bounds. Output from run_sir_stochastic() can be fed into
 the output using ggplot2.
 
 ```{r stochastic gillespie}
+# nolint start
+# modelout3 <- run_sir_stochastic(
+#   0.001, 0.1, 499, 100, 0, 500, # parameters, initial values
+#   100, # number of timesteps
+#   c("beta*s*i", "gamma*i"), # propensity functions
+#   matrix(c(-1, 0, +1, -1, 0, +1), # change matrix
+#     nrow = 3, byrow = TRUE
+#   ), 10 # number of simulations
+# )
+# nolint end
+
 modelout3 <- run_sir_stochastic(
-  0.001, 0.1, 499, 100, 0, 500, # parameters, initial values
-  100, # number of timesteps
-  c("beta*s*i", "gamma*i"), # propensity functions
-  matrix(c(-1, 0, +1, -1, 0, +1), # change matrix
-    nrow = 3, byrow = TRUE
-  ), 10 # number of simulations
+  # parameters, initial values
+  config$stochastic$beta, config$stochastic$gamma,
+  config$stochastic$s0, config$stochastic$i0, config$stochastic$r0,
+  config$stochastic$n_pop, # population size
+  config$stochastic$n_timesteps, # number of timesteps
+  config$stochastic$propensity_fns, # propensity functions
+  matrix(unlist(config$stochastic$change_matrix),
+    nrow = length(config$stochastic$change_matrix),
+    byrow = TRUE
+  ), # change matrix
+  config$stochastic$n_sims # number of simulations
 )
 ```
 
@@ -137,11 +205,25 @@ the output using ggplot2.
 
 
 ```{r stochastic tau}
+# nolint start
+# modelout4 <- run_sir_stochastic_tau(
+#   0.00001, 0.1, 1e05 - 1, 1, 0, 1e05, # parameters, initial values,
+#   100, # number of timesteps
+#   list(c(s = -1, i = 1), c(i = -1, r = 1)), # transitions (as a list)
+#   10 # number of simulations
+# )
+# nolint end
+
 modelout4 <- run_sir_stochastic_tau(
-  0.00001, 0.1, 1e05 - 1, 1, 0, 1e05, # parameters, initial values,
-  100, # number of timesteps
-  list(c(s = -1, i = 1), c(i = -1, r = 1)), # transitions (as a list)
-  10 # number of simulations
+  config$stochastic_tau$beta, config$stochastic_tau$gamma,
+  config$stochastic_tau$s0, config$stochastic_tau$i0, config$stochastic_tau$r0,
+  config$stochastic_tau$n_pop, # population size
+  config$stochastic_tau$n_timesteps, # number of timesteps
+  list(
+    setNames(config$stochastic_tau$transitions[[1]], c("s", "i")),
+    setNames(config$stochastic_tau$transitions[[2]], c("i", "r"))
+  ),
+  config$stochastic_tau$n_sims # number of simulations
 )
 ```
 

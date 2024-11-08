@@ -10,7 +10,7 @@ validate_sir_stoch_input(
   s0,
   i0,
   r0,
-  n,
+  n_pop,
   n_timesteps,
   method = NULL,
   propensity_fns = NULL,
@@ -30,7 +30,7 @@ validate_sir_stoch_input(
 
 \item{r0}{initial count of recovereds}
 
-\item{n}{population size}
+\item{n_pop}{population size}
 
 \item{n_timesteps}{number of time steps}
 
