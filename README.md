@@ -11,8 +11,27 @@ generalized compartmental modeling tools to use in a response and on future anal
 # Project Documents
 Two vignettes currently exist to walk users through basic SIR deterministic and stochastic compartmental model functionality and plotting, as well as basic generalized deterministic and stochastic modeling functionality and plotting. These will be expanded as functionatlity expands.
 
-# Similar projects to watch
-https://github.com/cdcent/cfa-eode/tree/main
+# Related Projects
+1. Scenarios model: https://github.com/cdcent/cfa-scenarios-model https://github.com/CDCgov/DynODE
+   Key differences: only deterministic model available with specific compartments (not generalized). Nice input configuration allowing more generalization.
+
+2. ASPR flumodels: https://github.com/HHS/ASPR-flumodels/tree/dev
+   Key differences: still specific compartments (not generalized)
+
+3. IDM-CMS: https://github.com/InstituteforDiseaseModeling/IDM-CMS https://docs.idmod.org/projects/cms/en/latest/index.html
+   Key differences: different setup involving JSONs but has deterministic and stochastic functionality and user defined compartments and flows
+
+4. CFA's e-ode: https://github.com/cdcent/cfa-eode/tree/main
+   Key differences: language is Python, not yet as built out to all of the models and options as this tool.
+
+5. CFA's simwrapper https://github.com/cdcent/cfa-sim-wrapper/
+   Key differences: goal is not to develop generalized models but to generalize the process of running simulations but wrapping the simulation input and output. Some architecture design may overlap and/or be useful.
+
+6. epirecipes website. http://epirecip.es/epicookbook/chapters/kr08
+   Key differences: not a package
+
+7. EpiModel package: https://epimodel.github.io/epimodel-training/
+   Key differences: TBD
 
 ## General Disclaimer
 This repository was created for use by CDC programs to collaborate on public health related projects in support of the [CDC mission](https://www.cdc.gov/about/organization/mission.htm).  GitHub is not hosted by the CDC, but is a third party website used by CDC and its partners to share information and collaborate on software. CDC use of GitHub does not imply an endorsement of any one particular service, product, or enterprise.
