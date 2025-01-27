@@ -29,18 +29,16 @@
 #' )
 #' }
 validate_gen_determ_input <- function(init_vals, times,
-                                      comp_names, trans_matrix) {
-  if (length(init_vals) != length(comp_names)) {
-    stop("The number of initial values must match the number of
-    compartment names.")
-  }
+                                      comp_names, trans_matrix, subgroups_list,
+                                      intervention_start_time,
+                                      intervention_end_time,
+                                      modifier) {
+  check_init_vals(init_vals, comp_names)
+  check_times(times)
+  check_trans_mtx(trans_matrix, comp_names)
+  check_subgroups_list(subgroups_list)
+  check_intervention_times(intervention_start_time, intervention_end_time)
+  check_modifier2(modifier)
 
-  if (!all(
-    rownames(trans_matrix) %in% comp_names
-  ) ||
-    !all(colnames(trans_matrix) %in% comp_names)) {
-    stop("Transition matrix row and column names must match the provided
-    compartment names.")
-  }
-  print("Input checks passed")
+  print("All input checks passed")
 }

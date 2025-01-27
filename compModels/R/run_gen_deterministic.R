@@ -54,6 +54,7 @@
 #' )
 #' modelout <- run_gen_deterministic(
 #'   initial_vals, time_seq, compartment_nms,
+#'   subgroups_list = NULL,
 #'   transition_mtx,
 #'   start, end,
 #'   mod_mat
@@ -143,7 +144,10 @@ run_gen_deterministic <- function(init_vals_base, times, comp_names_base,
                                   modifier = NULL) {
   validate_gen_determ_input(
     init_vals_base, times, comp_names_base,
-    trans_matrix_base
+    trans_matrix_base, subgroups_list,
+    intervention_start_time,
+    intervention_end_time,
+    modifier
   )
 
   subgroups_list <- Filter(Negate(is.null), subgroups_list)
