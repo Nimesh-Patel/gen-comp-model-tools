@@ -6,7 +6,8 @@
 #' @param compartments character string specifying which compartment to plot,
 #' defaults to "i" for infected
 #' @param time_var character string specifying the name of the time variable,
-#' defaults to t
+#' default is NULL, internal logic checks vector of possible time variable names
+#' (t, time)
 #' @param show_intervention_period optional logical argument (default FALSE) to
 #' add line(s) showing the start and/or end of the intervention
 #' @param intervention_period optional argument (default NULL) to add a vector
@@ -34,9 +35,26 @@
 #' }
 plot_stoch_model <- function(output,
                              compartments = c("i"),
-                             time_var = "t",
+                             time_var = NULL,
                              show_intervention_period = FALSE,
                              intervention_period = NULL) {
+  possible_time_vars <- c("t", "time")
+
+  if (is.null(time_var)) {
+    found_time_var <- FALSE
+    for (possible_time_var in possible_time_vars) {
+      if (possible_time_var %in% colnames(output[[1]])) {
+        time_var <- possible_time_var
+        found_time_var <- TRUE
+        print(paste0("Found time variable:", possible_time_var))
+        break
+      }
+    }
+    if (!found_time_var) {
+      stop("Time variable not found in output data.")
+    }
+  }
+
   combined_sims_df <- dplyr::bind_rows(lapply(seq_along(output), function(i) {
     cbind(simulation = i, output[[i]])
   }), .id = "simulation_id")

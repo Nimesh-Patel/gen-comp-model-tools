@@ -28,7 +28,7 @@ frequency dependent transmission.
 sir_deriv(
   time = 1,
   state = c(s = 1e05 - 1, i = 1, r = 0),
-  parms = c(beta = 0.00001, gamma = 0.1)
+  parms = c(beta = 0.5, gamma = 0.1)
 )
 }
 }

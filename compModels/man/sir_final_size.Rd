@@ -4,13 +4,17 @@
 \alias{sir_final_size}
 \title{Calculates final size of deterministic SIR model}
 \usage{
-sir_final_size(r_infinity, r_0)
+sir_final_size(r_infinity, r_0, s0, r0)
 }
 \arguments{
 \item{r_infinity}{Proportion (between 0 and 1) of recovered individuals
 as time goes toward infinity}
 
 \item{r_0}{Reproductive number}
+
+\item{s0}{Initial proportion of susceptibles}
+
+\item{r0}{Initial proportion of recovereds}
 }
 \value{
 single value vector (typeL double) containing the final outbreak
@@ -29,6 +33,8 @@ infecteds.
 }
 \examples{
 \dontrun{
-sir_final_size(1, 3)
+sir_final_size(1, 3, 1, 0)
+sir_final_size(1, 3, .5, .5)
+sir_final_size(1, 3, .2, .8)
 }
 }

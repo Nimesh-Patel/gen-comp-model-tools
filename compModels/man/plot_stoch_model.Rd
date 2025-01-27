@@ -7,7 +7,7 @@
 plot_stoch_model(
   output,
   compartments = c("i"),
-  time_var = "t",
+  time_var = NULL,
   show_intervention_period = FALSE,
   intervention_period = NULL
 )
@@ -19,7 +19,8 @@ plot_stoch_model(
 defaults to "i" for infected}
 
 \item{time_var}{character string specifying the name of the time variable,
-defaults to t}
+default is NULL, internal logic checks vector of possible time variable names
+(t, time)}
 
 \item{show_intervention_period}{optional logical argument (default FALSE) to
 add line(s) showing the start and/or end of the intervention}
