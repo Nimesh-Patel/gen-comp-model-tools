@@ -2,7 +2,8 @@
 #'
 #' Helper function to validate transition matrix, used as part of a validation
 #' function
-#' @param param description
+#' @param trans_matrix matrix of transition rates between each of the
+#' compartments
 #' @return stops with information or indicates checks passed
 #' }
 

@@ -2,7 +2,8 @@
 #'
 #' Helper function to validate subgroups, used as part of a validation
 #' function
-#' @param param description
+#' @param subgroups_list list of one or more vectors of subgroup names to be
+#' used for stratification
 #' @return stops with information or indicates checks passed
 #' }
 

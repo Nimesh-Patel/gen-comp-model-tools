@@ -3,7 +3,8 @@
 #' Helper function to validate modifier values, used as part
 #' of a validation function. A modifier should be one of: a single numeric
 #' value, a matrix of numeric values, or a function.
-#' @param param description
+#' @param modifier single value, matrix, or function to be applied to transition
+#' matrix during an intervention
 #' @return stops with information or indicates checks passed
 #' }
 check_modifier2 <- function(modifier) {

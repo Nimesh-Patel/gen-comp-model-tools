@@ -2,7 +2,8 @@
 #'
 #' Helper function to validate initial values, used as part of a validation
 #' function
-#' @param param description
+#' @param init_vals the starting values for populations in each compartment
+#' @param comp_names names of the compartments
 #' @return stops with information or indicates checks passed
 #' }
 
