@@ -12,7 +12,6 @@ Roxygen: list(markdown = TRUE, roclets = c("collate", "namespace", "rd"))
 RoxygenNote: 7.3.2
 Suggests:
     knitr,
-    purrr,
     rmarkdown,
     testthat (>= 3.0.0),
     yaml
@@ -28,5 +27,9 @@ Imports:
     RColorBrewer,
     rlang,
     tidyr,
-    tidyselect
+    tidyselect,
+    purrr,
+    stats,
+    stringr,
+    tibble
 VignetteBuilder: knitr

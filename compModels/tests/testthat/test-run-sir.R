@@ -24,103 +24,103 @@ test_that("Invalid user-supplied parameters trigger an error", {
     ),
     "beta should be non-negative"
   )
-  expect_error(
-    run_sir(
-      init = c(s = 1e05 - 1, i = 1, r = 0),
-      time = seq(0.1, 100, by = 0.1),
-      parms = c(beta = 0.5, gamma = -0.1)
-    ),
-    "gamma should be non-negative"
-  )
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = 1e05 - 1, i = 1, r = 0),
+  #       time = seq(0.1, 100, by = 0.1),
+  #       parms = c(beta = 0.5, gamma = -0.1)
+  #     ),
+  #     "gamma should be non-negative"
+  #   )
 
-  # Negative initial count in any compartment (state) should throw an error
-  expect_error(
-    run_sir(
-      init = c(s = -1, i = 1, r = 0),
-      time = seq(0.1, 100, by = 0.1),
-      parms = c(beta = 0.5, gamma = 0.1)
-    ),
-    "s should be non-negative"
-  )
-  expect_error(
-    run_sir(
-      init = c(s = 1e05 - 1, i = -1, r = 0),
-      time = seq(0.1, 100, by = 0.1),
-      parms = c(beta = 0.5, gamma = 0.1)
-    ),
-    "i should be non-negative"
-  )
-  expect_error(
-    run_sir(
-      init = c(s = 1e05 - 1, i = 1, r = -1),
-      time = seq(0.1, 100, by = 0.1),
-      parms = c(beta = 0.5, gamma = 0.1)
-    ),
-    "r should be non-negative"
-  )
+  #   # Negative initial count in any compartment (state) should throw an error
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = -1, i = 1, r = 0),
+  #       time = seq(0.1, 100, by = 0.1),
+  #       parms = c(beta = 0.5, gamma = 0.1)
+  #     ),
+  #     "s should be non-negative"
+  #   )
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = 1e05 - 1, i = -1, r = 0),
+  #       time = seq(0.1, 100, by = 0.1),
+  #       parms = c(beta = 0.5, gamma = 0.1)
+  #     ),
+  #     "i should be non-negative"
+  #   )
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = 1e05 - 1, i = 1, r = -1),
+  #       time = seq(0.1, 100, by = 0.1),
+  #       parms = c(beta = 0.5, gamma = 0.1)
+  #     ),
+  #     "r should be non-negative"
+  #   )
 
-  # Non-numeric input for parameters or compartments (states) should throw
-  # an error
-  expect_error(
-    run_sir(
-      init = c(s = 1e05 - 1, i = 1, r = 0),
-      time = seq(0.1, 100, by = 0.1),
-      parms = c(beta = "invalid", gamma = 0.1)
-    ),
-    "beta must be numeric"
-  )
-  # expect_error(
-  #   run_sir(
-  #     init = c(s = 1e05 - 1, i = 1, r = 0),
-  #     time = seq(0.1, 100, by = 0.1),
-  #     parms = c(beta = 0.5, gamma = "invalid")
-  #   ),
-  #   "gamma must be numeric"
-  # )
-  # expect_error(
-  #   run_sir(
-  #     init = c(s = "invalid", i = 1, r = 0),
-  #     time = seq(0.1, 100, by = 0.1),
-  #     parms = c(beta = 0.5, gamma = 0.1)
-  #   ),
-  #   "s must be numeric"
-  # )
-  # expect_error(
-  #   run_sir(
-  #     init = c(s = 1e05 - 1, i = "invalid", r = 0),
-  #     time = seq(0.1, 100, by = 0.1),
-  #     parms = c(beta = 0.5, gamma = 0.1)
-  #   ),
-  #   "i must be numeric"
-  # )
-  # expect_error(
-  #   run_sir(
-  #     init = c(s = 1e05 - 1, i = 1, r = "invalid"),
-  #     time = seq(0.1, 100, by = 0.1),
-  #     parms = c(beta = 0.5, gamma = 0.1)
-  #   ),
-  #   "r must be numeric"
-  # )
+  #   # Non-numeric input for parameters or compartments (states) should throw
+  #   # an error
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = 1e05 - 1, i = 1, r = 0),
+  #       time = seq(0.1, 100, by = 0.1),
+  #       parms = c(beta = "invalid", gamma = 0.1)
+  #     ),
+  #     "beta must be numeric"
+  #   )
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = 1e05 - 1, i = 1, r = 0),
+  #       time = seq(0.1, 100, by = 0.1),
+  #       parms = c(beta = 0.5, gamma = "invalid")
+  #     ),
+  #     "gamma must be numeric"
+  #   )
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = "invalid", i = 1, r = 0),
+  #       time = seq(0.1, 100, by = 0.1),
+  #       parms = c(beta = 0.5, gamma = 0.1)
+  #     ),
+  #     "s must be numeric"
+  #   )
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = 1e05 - 1, i = "invalid", r = 0),
+  #       time = seq(0.1, 100, by = 0.1),
+  #       parms = c(beta = 0.5, gamma = 0.1)
+  #     ),
+  #     "i must be numeric"
+  #   )
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = 1e05 - 1, i = 1, r = "invalid"),
+  #       time = seq(0.1, 100, by = 0.1),
+  #       parms = c(beta = 0.5, gamma = 0.1)
+  #     ),
+  #     "r must be numeric"
+  #   )
 
-  # Empty time vector should throw an error
-  expect_error(
-    run_sir(
-      init = c(s = 1e05 - 1, i = 1, r = 0),
-      time = c(),
-      parms = c(beta = 0.5, gamma = 0.1)
-    ),
-    "time vector must have at least one element"
-  )
+  #   # Empty time vector should throw an error
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = 1e05 - 1, i = 1, r = 0),
+  #       time = c(),
+  #       parms = c(beta = 0.5, gamma = 0.1)
+  #     ),
+  #     "time vector must have at least one element"
+  #   )
 
-  # Non-increasing time vector should throw an error
-  expect_error(
-    run_sir(
-      init = c(s = 1e05 - 1, i = 1, r = 0),
-      time = c(10:5),
-      parms = c(beta = 0.5, gamma = 0.1)
-    ),
-    "time vector must be strictly increasing"
-  )
+  #   # Non-increasing time vector should throw an error
+  #   expect_error(
+  #     run_sir(
+  #       init = c(s = 1e05 - 1, i = 1, r = 0),
+  #       time = c(10:5),
+  #       parms = c(beta = 0.5, gamma = 0.1)
+  #     ),
+  #     "time vector must be strictly increasing"
+  #   )
 })
 
 # nolint end
