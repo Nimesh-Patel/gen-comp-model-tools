@@ -48,7 +48,7 @@ modelout <- run_sir_stochastic(
     nrow = 3, byrow = TRUE
   ), 10
 )
-plot_stoch_model(modelout, compartments = c("s","i","r"))
+plot_stoch_model(modelout, compartments = c("s", "i", "r"))
 
 modelout2 <- run_sir_stochastic_tau(
   0.00001, 0.1, 1e05 - 1, 1, 0, 1e05, 100,
