@@ -85,7 +85,7 @@ plot_determin_model <- function(output, stratify_by = NULL,
                                 intervention_period = NULL,
                                 colors = RColorBrewer::brewer.pal(8, "Dark2")) {
   out_long <- as.data.frame(output) |>
-    tidyr::pivot_longer(-.data$time, names_to = "variable", values_to = "value")
+    tidyr::pivot_longer(-time, names_to = "variable", values_to = "value")
   plot_list <- list()
 
   unique_variables <- unique(out_long$variable)

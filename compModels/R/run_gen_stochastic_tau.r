@@ -21,13 +21,13 @@
 #' @examples
 #' \dontrun{
 #' init_vals <- c(s = 99999, i = 1, r = 0)
-#' transitions <- list(c(s = -1, i = 1), c(i = -1, r = 1))
-#' parms_vec <- c(beta = 0.00001, gamma = 0.1, n = 1e05)
+#' transitions <- matrix(c(-1, 1, 0, 0, -1, 1), nrow = 3)
+#' parms_vec <- c(beta = 0.5, gamma = 0.1, n = 1e05)
 #' n_timesteps <- 100
 #' n_sims <- 10
 #' rate_eqns <- list(
-#'   dplyr::expr(beta * s * i), # /n removed for now, will need to explore
-#'   dplyr::expr(gamma * i)
+#'   "(beta * s * i)/n",
+#'   "gamma * i"
 #' )
 #' out <- run_gen_stochastic_tau(
 #'   init_vals, # ssa.exact requires this to be a vector, not a named list
@@ -35,7 +35,6 @@
 #'   generalized_rates(rate_eqns),
 #'   parms_vec,
 #'   n_timesteps,
-#'   parms_vec[["n"]],
 #'   n_sims
 #' )
 #' plot_stoch_model(out, time_var = "time")
@@ -43,7 +42,7 @@
 run_gen_stochastic_tau <- function(init_vals, transitions,
                                    rate_func,
                                    parms_vec, n_timesteps,
-                                   n, n_sims) {
+                                   n_sims) {
   # Note: arguments in the order of ssa.exact() arguments
 
   validate_gen_stoch_input(parms_vec, init_vals, n_timesteps,

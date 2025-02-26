@@ -61,3 +61,24 @@ stochastic:
     - [0, 0, +1, -1]
     - [0, 0, 0, +1]
   n_sims: 10
+
+stochastic_tau:
+  init_vals: {s: 99999, i: 1, r: 0}
+  transitions:
+    infection:
+      -s: -1
+      -i: 1
+      -r: 0
+    recovery:
+     - s: 0
+     - i: -1
+     - r: 1
+  rate_eqns:
+    - "(beta * s * i)/n"
+    - "gamma * i"
+  params:
+    - beta: 0.5
+    - gamma: 0.1
+    - 'n': 100000
+  n_timesteps: 100
+  n_sims: 10

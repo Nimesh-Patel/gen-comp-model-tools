@@ -97,6 +97,7 @@ modelout0 <- run_gen_deterministic(
 Alternatively one can use a config file to run, as the below:
 ```{r gen deterministic2, fig.dim = c(6,4)}
 config <- yaml::read_yaml("config-generalized.yml")
+# full path: compModels/vignettes/config-generalized.yml
 
 modelout <- run_gen_deterministic(
   init_vals_base = unlist(config$deterministic$initial_vals),
@@ -302,7 +303,7 @@ modelout4 <- run_gen_stochastic(
 ```{r gen stochastic gillespie plot, fig.dim = c(6,4)}
 # Plot will default to plotting "i" compartment as second argument to the
 # function. NB: will need to rename to plot other compartments or for models
-# with other names for the infected compartmernt (eg. i1, i2, etc).
+# with other names for the infected compartment (e.g., i1, i2, etc.).
 # You can also print more than one compartment.
 plot_stoch_model(modelout4, compartments = "i1")
 
@@ -313,7 +314,7 @@ Using config approach.
 ```{r gen stochastic gillespie config, fig.dim = c(6,4)}
 # Plot will default to plotting "i" compartment as second argument to the
 # function. NB: will need to rename to plot other compartments or for models
-# with other names for the infected compartmernt (eg. i1, i2, etc).
+# with other names for the infected compartment (eg. i1, i2, etc).
 
 modelout4c <- run_gen_stochastic(
   parms_vec = c(
@@ -332,4 +333,23 @@ modelout4c <- run_gen_stochastic(
 
 plot_stoch_model(modelout4c, compartments = "i1")
 plot_stoch_model(modelout4c, compartments = c("i1", "i2"))
+```
+
+
+```{r gen stochastic tau config, fig.dim = c(6,4)}
+# Plot will default to plotting "i" compartment as second argument to the
+# function. NB: will need to rename to plot other compartments or for models
+# with other names for the infected compartment (eg. i1, i2, etc).
+
+modelout5 <- run_gen_stochastic_tau(
+  init_vals = unlist(config$stochastic_tau$init_vals),
+  transitions = matrix(unlist(config$stochastic_tau$transitions), nrow = 3),
+  rate_func = generalized_rates(config$stochastic_tau$rate_eqns),
+  parms_vec = unlist(config$stochastic_tau$params),
+  n_timesteps = as.numeric(config$stochastic_tau$n_timesteps),
+  n = as.numeric(config$stochastic_tau$params$n),
+  n_sims = as.numeric(config$stochastic_tau$n_sims)
+)
+
+plot_stoch_model(modelout5, time_var = "time")
 ```

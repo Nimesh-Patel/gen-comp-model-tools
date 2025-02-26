@@ -7,7 +7,7 @@
 check_adaptivetau_args(transitions)
 }
 \arguments{
-\item{transitions}{list object with transition information between states}
+\item{transitions}{matrix object with transition information between states}
 }
 \value{
 stops with information or indicates checks passed

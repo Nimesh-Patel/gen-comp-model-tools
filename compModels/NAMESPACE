@@ -3,6 +3,7 @@
 export(apply_growth_rate_calc)
 export(calculate_cuminf)
 export(calculate_initial_growth_rate)
+export(generalized_rates)
 export(plot_determin_model)
 export(plot_stoch_model)
 export(run_gen_deterministic)
