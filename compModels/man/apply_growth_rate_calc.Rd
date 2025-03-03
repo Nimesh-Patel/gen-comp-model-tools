@@ -63,8 +63,7 @@ calculate_initial_growth_rate(out,
   time_var = "time",
   beta = 0.5, gamma = 0.1,
   lower_time = 10,
-  upper_time = 25,
-  time_increment = 0.1
+  upper_time = 25
 )
 
 # Stochastic Model with 10 simulations
@@ -98,8 +97,7 @@ calculate_initial_growth_rate(modelout,
   time_var = "t", i_var = "i",
   beta = 0.5, gamma = 0.1,
   lower_time = 0,
-  upper_time = 25,
-  time_increment = 1
+  upper_time = 25
 )
 }
 }

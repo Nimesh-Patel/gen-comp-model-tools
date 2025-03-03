@@ -14,7 +14,7 @@
 #' [ggplot2::scale_color_manual()] values argument
 #' @return ggplot2 plot of compartmental model output
 #' @import ggplot2
-#' @import rlang
+#' @importFrom rlang .data
 #' @rdname plot_determin_model
 #' @export
 #' @examples
@@ -85,7 +85,7 @@ plot_determin_model <- function(output, stratify_by = NULL,
                                 intervention_period = NULL,
                                 colors = RColorBrewer::brewer.pal(8, "Dark2")) {
   out_long <- as.data.frame(output) |>
-    tidyr::pivot_longer(-time, names_to = "variable", values_to = "value")
+    tidyr::pivot_longer(-"time", names_to = "variable", values_to = "value")
   plot_list <- list()
 
   unique_variables <- unique(out_long$variable)

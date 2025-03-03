@@ -10,8 +10,8 @@ generalized_rates(rate_eqns)
 }
 \arguments{
 \item{rate_eqns}{a list of the transition rate equations between flows,
-expressed with dplyr::expr() and listed in the same order
-as the transitions supplied to the model runner function}
+listed in the same order as the transitions supplied to the
+model runner function}
 }
 \value{
 the rate(s) at a specific time point

@@ -347,7 +347,6 @@ modelout5 <- run_gen_stochastic_tau(
   rate_func = generalized_rates(config$stochastic_tau$rate_eqns),
   parms_vec = unlist(config$stochastic_tau$params),
   n_timesteps = as.numeric(config$stochastic_tau$n_timesteps),
-  n = as.numeric(config$stochastic_tau$params$n),
   n_sims = as.numeric(config$stochastic_tau$n_sims)
 )
 

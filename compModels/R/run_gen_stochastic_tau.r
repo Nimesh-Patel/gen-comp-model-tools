@@ -14,7 +14,6 @@
 #'                  can define rate_eqns to feed into the function (see example)
 #' @param parms_vec vector of parameter values
 #' @param n_timesteps number of time steps
-#' @param n population size
 #' @param n_sims number of simulations to run
 #' @return data frame object of the time and states of the simulation
 #' @export

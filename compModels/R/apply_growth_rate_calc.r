@@ -26,6 +26,7 @@
 #' rate in the user-specified time range, and observed growth rate based on the
 #' calculated growth rate r.
 #' @import ggplot2
+#' @importFrom rlang .data :=
 #' @examples
 #' \dontrun{
 #' # Deterministic Model
@@ -89,12 +90,16 @@ apply_growth_rate_calc <- function(output, time_var = NULL,
   formula_string <- paste("log_inc ~ time")
   # This line below needed for stochastic applications
   output <- output |>
-    dplyr::filter(!is.na(log_inc) & !is.nan(log_inc) & is.finite(log_inc))
+    dplyr::filter(
+      !is.na(.data$log_inc) &
+        !is.nan(.data$log_inc) &
+        is.finite(.data$log_inc)
+    )
   output$time <- as.numeric(output$time)
   output2 <- output |>
-    dplyr::filter(dplyr::between(time, lower_time, upper_time))
+    dplyr::filter(dplyr::between(.data$time, lower_time, upper_time))
 
-  fit <- lm(as.formula(formula_string), data = output2)
+  fit <- lm(stats::as.formula(formula_string), data = output2)
   r <- fit$coef[["time"]]
   print(paste("Growth rate is:", r))
 
@@ -116,8 +121,8 @@ apply_growth_rate_calc <- function(output, time_var = NULL,
   second_r_line <- r_growth(r, stoch_t_f, i_0)
 
   output3 <- output |>
-    dplyr::select(time, log_inc) |>
-    dplyr::filter(dplyr::between(time, lower_time, upper_time))
+    dplyr::select("time", "log_inc") |>
+    dplyr::filter(dplyr::between(.data$time, lower_time, upper_time))
 
   print(length(stoch_t_f))
   print(length(predicted_inc))
@@ -132,21 +137,24 @@ apply_growth_rate_calc <- function(output, time_var = NULL,
     log_pred_inc = log(predicted_inc), # theory
     log_inc = output3$log_inc # observations
   )
-  str(exp_growth_df)
+  utils::str(exp_growth_df)
 
   exp_growth_df2 <- exp_growth_df |>
-    tidyr::pivot_longer(!time,
+    tidyr::pivot_longer(!"time",
       names_to = "group",
       values_to = "value"
     )
-  str(exp_growth_df2)
+  utils::str(exp_growth_df2)
 
 
   p <- ggplot(
-    data = subset(exp_growth_df2, !group %in% c("log_inc", "pred")),
-    aes(x = time, y = value, color = group)
+    data = subset(exp_growth_df2, !"group" %in% c("log_inc", "pred")),
+    aes(x = .data$time, y = .data$value, color = .data$group)
   ) +
-    geom_point(data = output, aes(x = time, y = log_inc, color = "log_inc")) +
+    geom_point(data = output, aes(
+      x = .data$time, y = .data$log_inc,
+      color = "log_inc"
+    )) +
     geom_line() +
     labs(
       title = "Log-Transformed Incidence Over Time with
