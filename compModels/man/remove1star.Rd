@@ -13,6 +13,5 @@ remove1star(string)
 string with "1*" removed
 }
 \description{
-Remove "1*" from string only if theres
-no decimal before 1
+Remove "1*" from string only if no other numbers or decimals precede 1
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/empty2states.R
 \name{empty2states}
 \alias{empty2states}
-\title{Expands instructions to apply globally}
+\title{Replace "" in a vector with a given vector}
 \usage{
 empty2states(x, states)
 }
@@ -15,7 +15,7 @@ empty2states(x, states)
 character vector with replaced values
 }
 \description{
-Replace "" with given list. Write unit
-test and check where used for difference
-between vectors and list.
+Return the given x vector replacing all occurrences of "" with the given
+states vector. Ordering of "" replacement is not maintained since it's a
+many-to-one replacement.
 }

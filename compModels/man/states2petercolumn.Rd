@@ -8,19 +8,19 @@ states2petercolumn(statesdown, statesup, statelist)
 }
 \arguments{
 \item{statesdown}{State names to decrease in value
-(by one)}
+(by one). Repeat values to decrease by more than one}
 
-\item{statesup}{statesup State names to increase
-in value (by one)}
+\item{statesup}{State names to increase in value
+(by one). Repeat values to increase by more than one}
 
 \item{statelist}{character vector of state names
 that specifies order in output matrix}
 }
 \value{
-Column matrix with length(statelist) rows and
+Column vector (as a matrix) with length(statelist) rows and
 values the total integer changes to population.
 }
 \description{
-Input up/down states can be repeated to
-increase populations
+Counts occurrences of values in input vectors and combine to get total
+increase or decrease of a population due to a process
 }

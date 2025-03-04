@@ -8,11 +8,11 @@
 #' @return string of updated name
 #' @importFrom rlang .data
 makenewvariablenamesfromrow <- function(tibblerow) {
-  currbasestate <- tibblerow |> dplyr::pull(.data$basestates)
+  currbasestate <- tibblerow |> dplyr::pull("basestates")
   newname <- currbasestate
   # remove columns with only NA
   tibblerow <- tibblerow |>
-    dplyr::select(-.data$basestates) |>
+    dplyr::select(-"basestates") |>
     dplyr::select_if(~ !any(is.na(.)))
   if (ncol(tibblerow) >= 1) {
     for (currcol in colnames(tibblerow)) {

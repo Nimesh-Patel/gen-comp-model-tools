@@ -2,7 +2,7 @@
 % Please edit documentation in R/matchandpaste_basestate.R
 \name{matchandpaste_basestate}
 \alias{matchandpaste_basestate}
-\title{Convert list/vector to input length, keeps values as lists if}
+\title{Convert list/vector to input length, output is list}
 \usage{
 matchandpaste_basestate(inputvector, desiredlength)
 }

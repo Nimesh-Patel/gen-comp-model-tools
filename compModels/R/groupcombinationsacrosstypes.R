@@ -21,7 +21,7 @@ groupcombinationsacrosstypes <- function(combinethesetypes, tblgroup) {
     currbasestates <- currtblgroup$basestates[[1]]
     # types to get combinations
     list2cross <- lapply(listoftypes, function(x) {
-      x |> dplyr::pull(.data$groupname)
+      x |> dplyr::pull("groupname")
     })
     # multiply transition scales
     trans2cross <- lapply(listoftypes, function(x) {
@@ -44,8 +44,8 @@ groupcombinationsacrosstypes <- function(combinethesetypes, tblgroup) {
     tblout <- tblgroup |>
       dplyr::filter(.data$grouptype == combinethesetypes) |>
       dplyr::select(
-        .data$groupname, .data$interactionscale,
-        .data$transitionscale, .data$basestates
+        "groupname", "interactionscale",
+        "transitionscale", "basestates"
       ) |>
       dplyr::rename(!!combinethesetypes := .data$groupname)
   }

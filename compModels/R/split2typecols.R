@@ -24,10 +24,10 @@ split2typecols <- function(currtbl, combinelist, listgroupcombinations) {
   }
 
   listgroupcombo_unnest <- listgroupcombinations[[namedlistidx]] |>
-    tidyr::unnest(.data$basestates)
+    tidyr::unnest("basestates")
   # use to loop
   currtbl2loop <- currtbl |>
-    dplyr::select(-.data$grouptype)
+    dplyr::select(-"grouptype")
   # loop because they're easier, clean later
   bindlist <- list()
   for (rowidx in seq_len(nrow(currtbl2loop))) {

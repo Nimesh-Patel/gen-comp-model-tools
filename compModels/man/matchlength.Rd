@@ -17,5 +17,4 @@ lengthened vector same type as input
 \description{
 Replicates length one vector and ensures n-length
 vectors are same size as given length.
-Same as matchandpaste.R
 }
