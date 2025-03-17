@@ -87,6 +87,31 @@ dyn4 <- wrap_gillespie(
 )
 plot_stoch_model(dyn4, compartments = c("S", "E", "I_chain1", "I_chain2", "R"))
 
+# SE-Pro-I2R with prodromal period
+base_states <- c("S", "E", "Pro", "I", "R")
+sepi2r <- define_states(base_states) |>
+  add_infection("I", "S", "E", "beta") |>
+  add_infection("Pro", "S", "E", "beta_pro") |>
+  add_transition("I", "R", "tau", chainlength = 2) |>
+  add_transition("E", "Pro", "taue") |>
+  add_transition("Pro", "I", "taup")
+sepi2rcompiled <- compilemodel(sepi2r)
+sepi2r_rates <- sepi2rcompiled$modeloutstructions$processrates
+sepi2r_peter <- sepi2rcompiled$modeloutstructions$petermatrix
+sepi2r_states <- sepi2rcompiled$modeloutstructions$updatedstates
+
+dyn4p <- wrap_gillespie(
+  c("S" = 999, "I" = 1, "R" = 0, "E" = 0),
+  sepi2rcompiled,
+  c(beta = 2, beta_pro = 2.5, tau = 1, taue = .5, taup = 0.6),
+  25,
+  10
+)
+plot_stoch_model(dyn4p, compartments = c(
+  "S", "E", "Pro",
+  "I_chain1", "I_chain2", "R"
+))
+
 
 # SEI2{RH}
 base_states <- c("S", "E", "I", "R", "H")
