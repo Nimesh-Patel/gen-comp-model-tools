@@ -5,9 +5,9 @@
 #' Bull Math Biol (2012) 74:2126. This works for the case when the total
 #' population is N = 1.
 #'
-#' Note: Due to equation being for N = 1. [compModels::sir_deriv()] uses
-#' explicit frequency dependent transmission on the flow from susceptibles to
-#' infecteds.
+#' Note: Due to equation being for N = 1. the deprecated compModels function
+#' sir_deriv() uses explicit frequency dependent transmission on the flow from
+#' susceptibles to infecteds.
 #'
 #' @param r_infinity Proportion (between 0 and 1) of recovered individuals
 #' as time goes toward infinity
