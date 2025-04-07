@@ -1,6 +1,6 @@
 test_that("generalized_rates handles time-varying rates correctly", {
   # Define rate equations that vary with time
-  rate_eqns <- c("browser(); a * x + b * y + sin(t)", "d * x - e * y + cos(t)")
+  rate_eqns <- c("a * x + b * y + sin(t)", "d * x - e * y + cos(t)")
   rates_func <- generalized_rates(rate_eqns)
   state <- list(x = 1, y = 2)
   params <- list(a = 0.5, b = -0.3, d = -0.2, e = 0.4)
