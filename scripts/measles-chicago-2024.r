@@ -6,7 +6,6 @@
 # https://www.cdc.gov/mmwr/volumes/73/wr/mm7319a2.htm
 # https://github.com/CDCgov/measles-model-chicago-2024/tree/main
 
-# Loading necessary libraries
 library(devtools)
 library(Matrix)
 library(dplyr)
@@ -17,55 +16,7 @@ library(purrr)
 library(stringr)
 library(deSolve)
 library(ggplot2)
-# load package w/o installing.
 load_all("compModels")
-
-# Currently this function is on a different branch so needs to be brought in
-# until it is merged into the main branch.
-wrap_adaptivetau <- function(init_vals, compiledmodel, rate_func = NULL,
-                             parameters, n_timesteps, n_sims,
-                             method = "exact") {
-  x0 <- define_initialstate(
-    compiledmodel,
-    init_vals
-  ) |>
-    output_initialstate()
-  model_rates <- compiledmodel$modeloutstructions$processrates # rateeqns
-  model_peter <- compiledmodel$modeloutstructions$petermatrix # transitions
-  parameters <- parameters
-
-  t <- n_timesteps
-
-  if (is.null(rate_func)) {
-    rate_func <- generalized_rates
-  }
-
-  if (method == "exact") {
-    sims <- lapply(1:n_sims, function(i) {
-      adaptivetau::ssa.exact(
-        init.values = x0,
-        transitions = as.matrix(model_peter),
-        rateFunc = rate_func(as.list(model_rates)),
-        params = parameters,
-        tf = t
-      )
-    })
-  } else if (method == "adaptivetau") {
-    sims <- lapply(1:n_sims, function(i) {
-      adaptivetau::ssa.adaptivetau(
-        init.values = x0,
-        transitions = as.matrix(model_peter),
-        rateFunc = rate_func(as.list(model_rates)),
-        params = parameters,
-        tf = t
-      )
-    })
-  } else {
-    stop("Method not recognized. Please use 'exact' or 'adaptivetau'")
-  }
-
-  lapply(sims, function(x) data.frame(x))
-}
 
 # Measles Models
 # The approach here is to build up each piece of functionality in the
@@ -207,11 +158,8 @@ se2irvf_grp <- define_states(base_states) |>
   add_transition("I", "R", "tau") |>
   add_transition("E", "I", "taue", chainlength = 2) |>
   add_transition("S", c("V", "R"), "1/(theta)",
-    forkprobability = c("p", "1-p"), # indicating a rate
-    groupname = "1"
-  ) |> # in future will remove grps 1 and 5
-  # runs but doesn't yet work to remove the grp 1 or grp 5,
-  # changes needed in compilemodel()
+    forkprobability = c("p", "1-p") # indicating a rate
+  ) |>
   add_infection("I", "V", "E", "beta") |>
   add_group(as.character(1:5))
 
@@ -241,12 +189,71 @@ plot_stoch_model(dyn4,
 # to run the model in blocks of time, stop on mass vaccination dates and adjust
 # the state compartments and rates accordinging, then start again until the
 # next intervention time. The results of simulations in each time block will
-# need to be stitched together.
+# need to be stitched together. Here we run 10 time steps, vaccinate, then run
+# an additional 15 timesteps.
 
-# WORK IN PROGRESS
-# Pull out final line of one simulation
-last_row <- tail(dyn4[[1]], n = 1)
+base_states <- c("S", "E", "I", "R", "Sv")
+se2irvf_grp <- define_states(base_states) |>
+  add_infection("I", "S", "E", "beta") |>
+  add_transition("I", "R", "tau") |>
+  add_transition("E", "I", "taue", chainlength = 2) |>
+  add_transition("S", c("Sv", "R"), "1/(theta)",
+    forkprobability = c("p", "1-p") # indicating a rate
+  ) |>
+  add_infection("I", "Sv", "E", "beta") |>
+  add_group(as.character(1:5))
+se2irvfgcompiled <- compilemodel(se2irvf_grp)
+se2irvfg_rates <- se2irvfgcompiled$modeloutstructions$processrates
+se2irvfg_peter <- se2irvfgcompiled$modeloutstructions$petermatrix
+se2irvfg_states <- se2irvfgcompiled$modeloutstructions$updatedstates
+
+pre_vacc <- wrap_adaptivetau(
+  c("S" = 999, "I" = 1, "R" = 0, "E" = 0, "Sv" = 0),
+  se2irvfgcompiled,
+  rate_func = NULL, # this defaults to compModels::generalized_rates()
+  c(beta = 2, tau = 1, taue = .5, theta = .01, p = 0.4),
+  10,
+  1,
+  "adaptivetau"
+) # takes ~ 1 min for 25 timesteps
+last_row <- tail(pre_vacc[[1]], n = 1) |>
+  select(-1) |>
+  unlist()
 last_row
+
+# Vaccinating 200 of each remaining susceptible class (takes them to R, assumes
+# no further primary vaccine failure)
+current_states <- modify_states(last_row,
+  adjust_prefix = c("S_", "R_"),
+  adjust_value = c(-200, 200)
+)
+
+post_vacc <- wrap_adaptivetau(
+  current_states,
+  se2irvfgcompiled,
+  rate_func = NULL, # this defaults to compModels::generalized_rates()
+  c(beta = 2, tau = 1, taue = .5, theta = .01, p = 0.4),
+  15,
+  1,
+  "adaptivetau",
+  "current"
+)
+
+post_vacc_mod <- lapply(post_vacc, function(df) {
+  df$time <- df$time + 10
+  df <- df[-1, ]
+  return(df)
+})
+dyn5 <- Map(rbind, pre_vacc, post_vacc_mod)
+
+plot_stoch_model(dyn5,
+  compartments = se2irvfg_states,
+  colors =
+    colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(30)
+)
+
+
+
 
 
 

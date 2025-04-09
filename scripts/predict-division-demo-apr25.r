@@ -1,12 +1,3 @@
-# Live SIR demo code:
-
-
-
-
-
-
-
-
 # Measles model draft replicate the model development and simulation work done
 # during the Chicago Measles 2024 response.
 # Catherine Herzog & Bradford # Taylor.
@@ -49,17 +40,16 @@ load_all("compModels")
 # receive MMR vaccination. Homogenous mixing was assumed given the shelter
 # conditions.
 
-# Measles Model: SE2IRV with groups
-base_states <- c("S", "E", "I", "R", "V")
+# Measles Model: SE2IRSv with groups
+base_states <- c("S", "E", "I", "R", "Sv")
 measlesmodel <- define_states(base_states) |>
   add_infection("I", "S", "E", "beta") |>
   add_transition("I", "R", "tau") |>
   add_transition("E", "I", "taue", chainlength = 2) |>
-  add_transition("S", c("V", "R"), "1/(theta)",
-    forkprobability = c("p", "1-p"),
-    groupname = "1"
+  add_transition("S", c("Sv", "R"), "1/(theta)",
+    forkprobability = c("p", "1-p")
   ) |>
-  add_infection("I", "V", "E", "beta") |>
+  add_infection("I", "Sv", "E", "beta") |>
   add_group(as.character(1:5))
 
 measlescompiled <- compilemodel(measlesmodel)
@@ -71,17 +61,78 @@ measles_rates
 measles_peter
 measles_states
 
+# For reference this is the model we would have to write down manually!!
+# We can generate output with minimal input
+# Compare to seirMeasles/R/rates.R and seirMeasles/R/transitions.R
+modeleqn <- modeloutput2odeinput(measlescompiled)
+length(modeleqn) # 30 differential equations
+modeleqn
+
 # Simulation and Plotting
 dyn <- wrap_adaptivetau(
-  c("S" = 999, "I" = 1, "R" = 0, "E" = 0, "V" = 0),
+  c("S" = 999, "I" = 1, "R" = 0, "E" = 0, "Sv" = 0),
   measlescompiled,
   rate_func = NULL, # defaults to compModels::generalized_rates()
   c(beta = 2, tau = 1, taue = .5, theta = .01, p = 0.4),
+  # c(beta = 2, tau = 2, taue = 1.2, theta = .01, p = 0.4), #nolint
+  # c(beta = 10, tau = 0.2, taue = .2, theta = .01, p = (1 - .925)), #nolint
   25,
-  10,
+  1,
   "adaptivetau"
 )
 plot_stoch_model(dyn,
+  compartments = measles_states,
+  colors =
+    colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(30)
+)
+
+
+
+# 343 day Simulation with importation on first time step & intervention day 15
+pre_vacc <- wrap_adaptivetau(
+  c("S" = 999, "I" = 1, "R" = 0, "E" = 0, "Sv" = 0),
+  measlescompiled,
+  rate_func = NULL,
+  c(beta = 2, tau = 1, taue = .5, theta = .01, p = 0.4),
+  # c(beta = 2, tau = 2, taue = 1.4, theta = .01, p = 0.4), #nolint
+  15,
+  1,
+  "adaptivetau"
+)
+last_row <- tail(pre_vacc[[1]], n = 1) |>
+  select(-1) |>
+  unlist()
+last_row
+
+# Vaccinating the three eligible susceptible classes (takes them to R, assumes
+# no further primary vaccine failure)
+current_states <- modify_states(last_row,
+  adjust_names = c(
+    "S_group2", "S_group3", "S_group4",
+    "R_group2", "R_group3", "R_group4"
+  ),
+  adjust_value = c(-277, -276, -343, 277, 276, 343)
+)
+
+post_vacc <- wrap_adaptivetau(
+  current_states,
+  measlescompiled,
+  rate_func = NULL, # this defaults to compModels::generalized_rates()
+  c(beta = 2, tau = 1, taue = .5, theta = .01, p = 0.4),
+  25,
+  1,
+  "adaptivetau",
+  "current"
+)
+
+post_vacc_mod <- lapply(post_vacc, function(df) {
+  df$time <- df$time + 15
+  df <- df[-1, ]
+  return(df)
+})
+dyn_int <- Map(rbind, pre_vacc, post_vacc_mod)
+
+plot_stoch_model(dyn_int,
   compartments = measles_states,
   colors =
     colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(30)
