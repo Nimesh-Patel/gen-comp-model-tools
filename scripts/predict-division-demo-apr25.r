@@ -1,6 +1,6 @@
 # Measles model draft replicate the model development and simulation work done
 # during the Chicago Measles 2024 response.
-# Catherine Herzog & Bradford # Taylor.
+# Catherine Herzog & Bradford Taylor.
 
 # Background
 # https://www.sciencedirect.com/science/article/pii/S2468266723001305?via%3Dihub#sec1 # nolint
@@ -74,8 +74,6 @@ dyn <- wrap_adaptivetau(
   measlescompiled,
   rate_func = NULL, # defaults to compModels::generalized_rates()
   c(beta = 2, tau = 1, taue = .5, theta = .01, p = 0.4),
-  # c(beta = 2, tau = 2, taue = 1.2, theta = .01, p = 0.4), #nolint
-  # c(beta = 10, tau = 0.2, taue = .2, theta = .01, p = (1 - .925)), #nolint
   25,
   1,
   "adaptivetau"
@@ -88,13 +86,12 @@ plot_stoch_model(dyn,
 
 
 
-# 343 day Simulation with importation on first time step & intervention day 15
+# Simulation with importation on first time step & intervention day 15
 pre_vacc <- wrap_adaptivetau(
   c("S" = 999, "I" = 1, "R" = 0, "E" = 0, "Sv" = 0),
   measlescompiled,
   rate_func = NULL,
   c(beta = 2, tau = 1, taue = .5, theta = .01, p = 0.4),
-  # c(beta = 2, tau = 2, taue = 1.4, theta = .01, p = 0.4), #nolint
   15,
   1,
   "adaptivetau"
@@ -111,7 +108,7 @@ current_states <- modify_states(last_row,
     "S_group2", "S_group3", "S_group4",
     "R_group2", "R_group3", "R_group4"
   ),
-  adjust_value = c(-277, -276, -343, 277, 276, 343)
+  adjust_value = c(-200, -200, -200, 200, 200, 200)
 )
 
 post_vacc <- wrap_adaptivetau(

@@ -254,38 +254,91 @@ plot_stoch_model(dyn5,
 
 
 
+# Functionality working on development branch
+# Closer approximation to measles model
+base_states <- c("S", "E", "I", "R", "Sv")
+measlesmodel2 <- define_states(base_states) |>
+  add_infection("I", "S", "E", "beta") |>
+  add_transition("I", "R", "tau") |>
+  add_transition("E", "I", "taue", chainlength = 2) |>
+  add_transition("S", c("Sv", "R"), "1/(theta)",
+    forkprobability = c("p", "1-p"),
+    groupname = 3:4, processname = "vax"
+  ) |>
+  add_transition("S", c("Sv", "R"), "1/(theta)",
+    forkprobability = c("p_infant", "1-p_infant"),
+    groupname = 2, processname = "vax"
+  ) |>
+  add_infection("I", "Sv", "E", "beta") |>
+  add_group(1:5, grouptype = "Age")
+measlescompiled2 <- compilemodel(measlesmodel2)
 
+measles_rates2 <- measlescompiled2$modeloutstructions$processrates
+measles_peter2 <- measlescompiled2$modeloutstructions$petermatrix
+measles_states2 <- measlescompiled2$modeloutstructions$updatedstates
+measles_rates2
+measles_peter2
+measles_states2
 
+# Population information
+# nolint start
+initial_values <- c(
+  "S_group1" = 8 * .3333, "E_group1_chain1" = 0, "E_group1_chain2" = 0, "I_group1" = 0, "R_group1" = 1 - 8 * .3333, "Sv_group1" = 0,
+  "S_group2" = 13 * .667, "E_group2_chain1" = 0, "E_group2_chain2" = 0, "I_group2" = 0, "R_group2" = 1 - 13 * .667, "Sv_group2" = 0,
+  "S_group3" = 704 * .172, "E_group3_chain1" = 0, "E_group3_chain2" = 0, "I_group3" = 0, "R_group3" = 1 - 704 * .172, "Sv_group3" = 0,
+  "S_group4" = 1139 * .1, "E_group4_chain1" = 0, "E_group4_chain2" = 0, "I_group4" = 0, "R_group4" = 1 - 1139 * .1, "Sv_group4" = 0,
+  "S_group5" = 13 * .1, "E_group5_chain1" = 0, "E_group5_chain2" = 0, "I_group5" = 0, "R_group5" = 1 - 13 * .1, "Sv_group5" = 0
+)
+# nolint end
 
-## Future Work & Functionality Needs
+pre_vacc2 <- wrap_adaptivetau(
+  initial_values,
+  measlescompiled2,
+  rate_func = NULL,
+  c(
+    beta = 5, tau = 5, taue = 8, theta = .01,
+    p = 1 - 0.925, p_infant = 1 - .84
+  ),
+  15, # from date of first import to intervention day
+  1,
+  "adaptivetau"
+)
+last_row2 <- tail(pre_vacc2[[1]], n = 1) |>
+  select(-1) |>
+  unlist()
+last_row2
 
-# Handling pulsed interventions and stitching together the simulations
-# from each time block. Propose 1+ wrappers to address this and enable a
-# compiled model object that stores the model for each time block (CH)
+current_states2 <- modify_states(last_row2,
+  adjust_names = c(
+    "S_group2", "S_group3", "S_group4",
+    "R_group2", "R_group3", "R_group4"
+  ),
+  adjust_value = c(-277, -276, -329, 277, 276, 329) # actual vaccinations
+)
 
-# Enable modifications of chained compartment distributions to address
-# biological reality in the timing and progression of the prodromal period and
-# symptoms. (see add_transitions())  (BT)
+post_vacc2 <- wrap_adaptivetau(
+  current_states2,
+  measlescompiled2,
+  rate_func = NULL, # this defaults to compModels::generalized_rates()
+  c(
+    beta = 5, tau = 5, taue = 8, theta = .01, p = 1 - 0.925,
+    p_infant = 1 - .84
+  ),
+  328, # 328 days remaining after first intervention day
+  1,
+  "adaptivetau",
+  "current"
+)
 
-# Enable easy movement of individuals between groups (BT)
+post_vacc_mod2 <- lapply(post_vacc2, function(df) {
+  df$time <- df$time + 15
+  df <- df[-1, ]
+  return(df)
+})
+dyn_int2 <- Map(rbind, pre_vacc2, post_vacc_mod2)
 
-# Improve plotting style (CH)
-
-# Link to / create ABC functionality to recreate model priors
-
-# Add filtering functionality to be able to filter stochastic trajectories to
-# those observed on a given day
-
-# Data import function suite, e.g. for easy incorporation of external data such
-# country and age-specific immunity profile used in MMWR
-
-## Align simulations with MMWR, specifically:
-# 365 days starting 2/1/2024 with 10k stochastic sims per scenario
-
-# Generate experiment/scenario functionality to run counterfactual scenarios
-# of vaccinating earlier or later (eg 3/1/24 or 3/15/24 compared to 3/8/24)
-
-# Ensure calibration functionality to align with: "Outbreak size forecasts were
-# calibrated by selecting 100 simulations with the smallest absolute difference
-# between predicted and observed daily cumulative measles cases among shelter
-# residents."
+plot_stoch_model(dyn_int2,
+  compartments = measles_states2,
+  colors =
+    colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(30)
+)
