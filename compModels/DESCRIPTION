@@ -1,15 +1,20 @@
 Package: compModels
-Title: Generalized deterministic & stochastic compartmental models
+Title: Programmatically building compartmental models
 Version: 0.0.0.9000
 Authors@R:
-    person("Catherine", "Herzog", , "uvw5@cdc.gov", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0003-3021-888X"))
-    person("Taylor", "Bradford", , "zyh6@cdc.gov", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0001-7808-955X"))
-Description: Convenience package of deterministic and stochastic compartmental
-             model functions and their respective plotting functions. Users can
-             programmatically build infectious disease compartmental models via
-             semantic function calls.
+    c(person("Catherine", "Herzog", , "uvw5@cdc.gov", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-3021-888X")),
+    person("Taylor", "Bradford", , "zyh6@cdc.gov", role = c("aut"),
+           comment = c(ORCID = "0000-0001-7808-955X")))
+Description: This package enables users to programmatically build compartmental
+             models using descriptive input, as opposed to math. The package
+             includes deterministic and stochastic modeling functionality and
+             the compiled model object produced can be used to connection a
+             variety of other packages and modeling tools. The generalizability
+             and modularity of the package tools speeds up both simple and
+             complex model development and enables users to easily add/remove/
+             stratify/chain compartments and automatically generates states and
+             processes.
 License: Apache License 2.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, roclets = c("collate", "namespace", "rd"))
