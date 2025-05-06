@@ -1,10 +1,10 @@
 Package: compModels
 Title: Programmatically building compartmental models
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R:
     c(person("Catherine", "Herzog", , "uvw5@cdc.gov", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3021-888X")),
-    person("Taylor", "Bradford", , "zyh6@cdc.gov", role = c("aut"),
+    person("Bradford", "Taylor", , "zyh6@cdc.gov", role = c("aut"),
            comment = c(ORCID = "0000-0001-7808-955X")))
 Description: This package enables users to programmatically build compartmental
              models using descriptive input, as opposed to math. The package
