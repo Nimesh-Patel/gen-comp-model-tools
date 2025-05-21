@@ -40,7 +40,7 @@ start from a spot other than initial (e.g. stitching together simulations
 with different time blocks of interventions)}
 }
 \value{
-list of dataframes object of the data part of GillespieSSA object
+list of data frames object of the data part of adaptivetau object
 containing the time and states of the simulation. Number of elements should
 match the number of simulations
 }

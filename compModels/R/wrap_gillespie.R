@@ -6,7 +6,7 @@
 #' @param parameters vector of parameter values
 #' @param n_timesteps number of time steps
 #' @param n_sims number of simulations desired
-#' @return list of dataframes object of the data part of GillespieSSA object
+#' @return list of data frames object of the data part of GillespieSSA object
 #' containing the time and states of the simulation. Number of elements should
 #' match the number of simulations
 #' @export
@@ -68,8 +68,6 @@ wrap_gillespie <- function(init_vals, compiledmodel, parameters, n_timesteps,
       parms = current_parameters,
       tf = t,
       method = GillespieSSA::ssa.d()
-    )$data
+    )$data |> data.frame()
   })
-
-  lapply(sims, function(x) data.frame(x))
 }

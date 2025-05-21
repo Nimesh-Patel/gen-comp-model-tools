@@ -15,7 +15,7 @@
 #' be used as the current values  of the simulation for when the user needs to
 #' start from a spot other than initial (e.g. stitching together simulations
 #' with different time blocks of interventions)
-#' @return list of dataframes object of the data part of GillespieSSA object
+#' @return list of data frames object of the data part of adaptivetau object
 #' containing the time and states of the simulation. Number of elements should
 #' match the number of simulations
 #' @export
@@ -88,8 +88,9 @@ wrap_adaptivetau <- function(init_vals, compiledmodel, rate_func = NULL,
       output_initialstate()
   }
 
-  model_rates <- compiledmodel$modeloutstructions$processrates # rateeqns
-  model_peter <- compiledmodel$modeloutstructions$petermatrix # transitions
+  # rateeqns, transitions, parameters
+  model_rates <- as.list(compiledmodel$modeloutstructions$processrates)
+  model_peter <- as.matrix(compiledmodel$modeloutstructions$petermatrix)
   parameters <- parameters
 
   t <- n_timesteps
@@ -102,25 +103,23 @@ wrap_adaptivetau <- function(init_vals, compiledmodel, rate_func = NULL,
     sims <- lapply(1:n_sims, function(i) {
       adaptivetau::ssa.exact(
         init.values = x0,
-        transitions = as.matrix(model_peter),
-        rateFunc = rate_func(as.list(model_rates)),
+        transitions = model_peter,
+        rateFunc = rate_func(model_rates),
         params = parameters,
         tf = t
-      )
+      ) |> data.frame()
     })
   } else if (method == "adaptivetau") {
     sims <- lapply(1:n_sims, function(i) {
       adaptivetau::ssa.adaptivetau(
         init.values = x0,
-        transitions = as.matrix(model_peter),
-        rateFunc = rate_func(as.list(model_rates)),
+        transitions = model_peter,
+        rateFunc = rate_func(model_rates),
         params = parameters,
         tf = t
-      )
+      ) |> data.frame()
     })
   } else {
     stop("Method not recognized. Please use 'exact' or 'adaptivetau'")
   }
-
-  lapply(sims, function(x) data.frame(x))
 }

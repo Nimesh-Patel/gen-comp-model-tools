@@ -19,7 +19,7 @@ wrap_gillespie(init_vals, compiledmodel, parameters, n_timesteps, n_sims)
 \item{n_sims}{number of simulations desired}
 }
 \value{
-list of dataframes object of the data part of GillespieSSA object
+list of data frames object of the data part of GillespieSSA object
 containing the time and states of the simulation. Number of elements should
 match the number of simulations
 }

@@ -6,7 +6,7 @@
 #' @param compiledmodel compiled model as a list, output from compilemodel()
 #' @param parms named vector of parameters passed to the ode function created by
 #' model2desolvefunction using the compiledmodel
-#' @return deSolve output run on provided input
+#' @return data frame of deSolve output run on provided input
 #' @export
 #' @examples
 #' \dontrun{
@@ -30,5 +30,5 @@ wrap_ode <- function(y, times, compiledmodel, parms) {
   parameters <- parms
   times <- times
   dyn <- deSolve::ode(y = x0, times = times, func = odefun, parms = parameters)
-  return(dyn)
+  data.frame(dyn)
 }

@@ -18,7 +18,7 @@ value must be the initial time}
 model2desolvefunction using the compiledmodel}
 }
 \value{
-deSolve output run on provided input
+data frame of deSolve output run on provided input
 }
 \description{
 Wrapper to run \code{\link[deSolve:ode]{deSolve::ode()}} from compiled model and formatted inputs
