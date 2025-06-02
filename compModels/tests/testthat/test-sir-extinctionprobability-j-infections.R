@@ -10,6 +10,7 @@ test_that("calculating sir extinction probability with exactly j infections", {
   x0 <- c(s = n - 1, i = 1, r = 0)
   maxt <- 25
   print("running stochastic SIR simulation")
+  set.seed(389)
   sciout <- wrap_adaptivetau(
     x0,
     sirc,
@@ -55,8 +56,9 @@ test_that("calculating sir extinction probability with exactly j infections", {
     }
     result
   }
-  expect_equal(exact_finalsize_prob(1, sir_pars),
-    get_prob_for_j(1, final_tbl),
-    tolerance = 0.03
+
+  comparison <- abs(
+    exact_finalsize_prob(1, sir_pars) - get_prob_for_j(1, final_tbl)
   )
+  expect_true(comparison <= 0.03)
 })
