@@ -1,0 +1,12 @@
+baseline_parameters:
+  S0: 999
+  I0: 1
+  R0: 0
+  start_time: 0
+  n_timesteps: 30
+  timesby: 0.01
+  n_sims: 5
+
+grid_parameters:
+  beta: [2.0, 3.0]
+  tau: [1.0, 2.0]
