@@ -6,7 +6,7 @@ test_that("filterpopsize_byfeature filters tables", {
     add_group(c("group1", "group2"), grouptype = "type1") |>
     define_metapopulations(c("UK", "USA"))
   compiledmodel <- compilemodel(modelinstructions)
-  tblpopsize <- compiledmodel[["modelinstructions"]][["tblupdatedstates"]]
+  tblpopsize <- define_popsize(compiledmodel)
 
   single <- filterpopsize_byfeature(tblpopsize,
     basestates = "I",

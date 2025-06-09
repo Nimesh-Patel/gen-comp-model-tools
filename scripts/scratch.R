@@ -14,7 +14,8 @@ SI2Rc
 
 SIRgroups <- define_states(c("S", "I", "R")) |>
   add_infection("I", "S", "I", "beta", processname = "infection") |>
-  add_transition("I", "R", "tau", processname = "recovery") |>
+  add_transition("I", "R", "tau", processname = "recovery", chainlength = 3) |>
+  add_transition("I", "R", "tau", processname = "recovery2", chainlength = 5) |>
   add_group(
     groupname = c("old", "young"), grouptype = "Age",
     scaleprocessbyname = list(infection = c(1, 2))
@@ -25,9 +26,7 @@ SIRgroups2 <- SIRgroups |>
     groupname = c("Patient", "HCW"), grouptype = "Status",
     scaletransitions = c(.5, 1)
   ) |>
-  add_group(c("happy", "sad"), grouptype = "demeanor") |>
-  combine_groups(c("Age", "Status")) |>
-  combine_groups(c("Age", "demeanor"))
+  combine_groups(c("Age", "Status"))
 
 SIRgroupsc <- compilemodel(SIRgroups)
 inputpeter <- SIRgroups2
@@ -320,4 +319,16 @@ ggplot(out, aes(x = time, y = alpha), color = blue) +
     aes(x = tdeath, y = alpha), color = "red"
   ) +
   xlim(0, max(sciout_filterplot))
+
+
+# exmple popsize script
+basestates <- c("S", "I", "R")
+modelinstructions <- define_states(basestates) |>
+  add_transition("I", "R", "tau", chainlength = 2) |>
+  add_infection("I", "S", "I", "beta") |>
+  add_group(c("group1", "group2"), grouptype = "type1")
+compiledmodel <- compilemodel(modelinstructions)
+
+tblpopsize <- define_popsize(compiledmodel) |>
+  setpopsize_byfeature(.99, basestates = c("S"), groupnames = list(type1 = c("group1", "group2")), chains = 1)
 # nolint end

@@ -898,6 +898,10 @@ compilemodel <- function(inputpeter) { # nolint: cyclocomp_linter.
         )
     )
 
+  # keep columns with multiple distinct values
+  tblupdatestate_clean <-
+    tblupdatestate_clean |> dplyr::select_if(function(x) length(unique(x)) > 1)
+
   peterlist <- list()
   peterlist$updatedstates <- tblupdatestate$updatedstate
   peterlist$petermatrix <- petersenmat
