@@ -757,6 +757,11 @@ compilemodel <- function(inputpeter) { # nolint: cyclocomp_linter.
         as.vector(curr_inter$states_in[[1]][curr_inter$changestateidx])
       currmetapop <- curr_inter$metapopulation
 
+      setdiff_states <- setdiff(
+        as.vector(curr_inter$states_in[[1]]),
+        currstates_down
+      )
+
       currpercapitastate <-
         list(as.vector(curr_inter$states_in[[1]]))
       currpercapitarate <- curr_inter$rate
@@ -776,10 +781,17 @@ compilemodel <- function(inputpeter) { # nolint: cyclocomp_linter.
         )
       }
       currrate <- paste0(
-        "(",
+        paste(currpercapitastate[[1]], collapse = "*"),
+        "*(",
         currpercapitarate,
-        ")*",
-        paste(currpercapitastate[[1]], collapse = "*")
+        ")"
+      )
+
+      currpercapitarate_clean <- paste0(
+        paste(setdiff_states, collapse = "*"),
+        "*(",
+        currpercapitarate_clean,
+        ")"
       )
       tibble2bind[[loopidx]] <- tibble::tibble(
         states_up = list(currstates_up),
