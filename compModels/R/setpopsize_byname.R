@@ -9,7 +9,7 @@
 #' @importFrom rlang .data
 setpopsize_byname <- function(tblpopsize, namevec) {
   check_inputpopsize(tblpopsize)
-  intlogic_before <- intlogic(tblpopsize[["popsize"]])
+  intlogic_before <- intlogic(tblpopsize)
 
   # check input
   namescompiled <- tblpopsize[["updatedstate"]]
@@ -27,9 +27,7 @@ setpopsize_byname <- function(tblpopsize, namevec) {
     tblpopsize[["popsize"]][currlogic] <- currval
   }
 
-  tblpopsize <- maintainpopsizetype(tblpopsize, "popsize")
-
-  intlogic_after <- intlogic(tblpopsize[["popsize"]])
+  intlogic_after <- intlogic(tblpopsize)
 
   if (intlogic_before != intlogic_after) {
     warning("popsize changed between non-integer and integer. Ensure this is

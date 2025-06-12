@@ -75,7 +75,7 @@ movethresholdpopsize_byfeature <- function(tblpopsize, # nolint: cyclocomp_linte
                                            movefromallchains = FALSE) {
   check_inputpopsize(tblpopsize)
   # compare popsize type before and after applying
-  intlogic_before <- intlogic(tblpopsize[["popsize"]])
+  intlogic_before <- intlogic(tblpopsize)
 
   # check acceptable input and id columns to ignore when joining.
   # These columns change values before and after
@@ -357,8 +357,8 @@ movethresholdpopsize_byfeature <- function(tblpopsize, # nolint: cyclocomp_linte
   if (min(tblpopsize[["popsize"]]) < 0) {
     stop("Negative popsize after moving populations. Check input.")
   }
-  tblpopsize <- maintainpopsizetype(tblpopsize, "popsize")
-  intlogic_after <- intlogic(tblpopsize[["popsize"]])
+
+  intlogic_after <- intlogic(tblpopsize)
   if (intlogic_before != intlogic_after) {
     message("popsize changed between non-integer and integer. Ensure this is
     intentional.")

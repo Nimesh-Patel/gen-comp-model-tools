@@ -42,8 +42,6 @@ define_popsize <- function(compiledmodel, inputpops = c()) {
     message("No population sizes input. Initializing all states to 0.")
     tblout <- tblupdatestate |> dplyr::mutate(popsize = 0)
   }
-  # convert to integer if consistent with input
-  tblout <- maintainpopsizetype(tblout, "popsize")
 
   tblout
 }

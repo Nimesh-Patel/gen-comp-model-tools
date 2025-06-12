@@ -35,7 +35,7 @@ setpopsize_byfeature <- function(tblpopsize,
     stop("newpopsize must be length 1.")
   }
 
-  intlogic_before <- intlogic(tblpopsize[["popsize"]])
+  intlogic_before <- intlogic(tblpopsize)
 
   tblpopsize_filter <-
     filterpopsize_byfeature(tblpopsize,
@@ -55,9 +55,7 @@ setpopsize_byfeature <- function(tblpopsize,
     dplyr::mutate(popsize = dplyr::coalesce(.data$popsizenew, .data$popsize)) |>
     dplyr::select(-"popsizenew")
 
-  tblout <- maintainpopsizetype(tblout, "popsize")
-
-  intlogic_after <- intlogic(tblout[["popsize"]])
+  intlogic_after <- intlogic(tblout)
 
   if (intlogic_before != intlogic_after) {
     message("popsize changed between non-integer and integer. Ensure this is

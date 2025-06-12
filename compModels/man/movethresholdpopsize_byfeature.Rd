@@ -95,5 +95,5 @@ features that do not change before and after the move, but specify
 which populations to move between. Multiple states can move into a single
 state, allowing a more-to-fewer mapping across the whole popsize table.
 Checks ensure proper input argument combinations. Amount moved is up to
-specifed popsizeval ensuring no negative populations
+specifed movepopsize ensuring no negative populations
 }

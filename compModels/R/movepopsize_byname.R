@@ -17,7 +17,7 @@ movepopsize_byname <- function(tblpopsize, popsizeval, namebefore, nameafter) {
     stop("nameafter argument must be length 1")
   }
 
-  intlogic_before <- intlogic(tblpopsize[["popsize"]])
+  intlogic_before <- intlogic(tblpopsize)
 
   namescompiled <- tblpopsize[["updatedstate"]]
 
@@ -37,9 +37,8 @@ movepopsize_byname <- function(tblpopsize, popsizeval, namebefore, nameafter) {
     stop("Moving populations caused negative population. Consider using
     movefractionpopsize_byname.")
   }
-  tblpopsize <- maintainpopsizetype(tblpopsize, "popsize")
 
-  intlogic_after <- intlogic(tblpopsize[["popsize"]])
+  intlogic_after <- intlogic(tblpopsize)
 
   if (intlogic_before != intlogic_after) {
     message("popsize changed between non-integer and integer. Ensure this is

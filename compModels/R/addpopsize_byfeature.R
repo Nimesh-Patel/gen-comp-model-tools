@@ -36,7 +36,7 @@ addpopsize_byfeature <- function(tblpopsize,
     stop("addpopsize must be length 1.")
   }
 
-  intlogic_before <- intlogic(tblpopsize[["popsize"]])
+  intlogic_before <- intlogic(tblpopsize)
 
   tblpopsize_filter <-
     filterpopsize_byfeature(tblpopsize,
@@ -53,9 +53,7 @@ addpopsize_byfeature <- function(tblpopsize,
       tblpopsize[["popsize"]][currlogic] + addpopsize
   }
 
-  tblpopsize <- maintainpopsizetype(tblpopsize, "popsize")
-
-  intlogic_after <- intlogic(tblpopsize[["popsize"]])
+  intlogic_after <- intlogic(tblpopsize)
 
   if (intlogic_before != intlogic_after) {
     message("popsize changed between non-integer and integer. Ensure this is

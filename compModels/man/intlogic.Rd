@@ -2,16 +2,16 @@
 % Please edit documentation in R/intlogic.R
 \name{intlogic}
 \alias{intlogic}
-\title{Determine if vector has integer values}
+\title{Determine if popsize has integer values}
 \usage{
-intlogic(vec)
+intlogic(tblpopsize)
 }
 \arguments{
-\item{vec}{vector to check values}
+\item{tblpopsize}{table with popsize column}
 }
 \value{
 logical for containing integers
 }
 \description{
-Determine if vector has integer values
+Determine if popsize has integer values
 }
