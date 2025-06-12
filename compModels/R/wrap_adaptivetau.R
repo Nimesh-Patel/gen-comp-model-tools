@@ -10,11 +10,6 @@
 #' @param n_sims number of simulations desired
 #' @param method method to use in adaptivetau, defaults to "exact". Other option
 #' is "adaptivetau"
-#' @param usestates "initial" is default option to use the user supplied
-#' init_vals vector as as initial values, "current" option allows init_vals to
-#' be used as the current values  of the simulation for when the user needs to
-#' start from a spot other than initial (e.g. stitching together simulations
-#' with different time blocks of interventions)
 #' @return list of data frames object of the data part of adaptivetau object
 #' containing the time and states of the simulation. Number of elements should
 #' match the number of simulations
@@ -73,20 +68,8 @@
 #' }
 wrap_adaptivetau <- function(init_vals, compiledmodel, rate_func = NULL,
                              parameters, n_timesteps, n_sims,
-                             method = "exact", usestates = "initial") {
-  if (usestates == "initial") {
-    x0 <- define_initialstate(
-      compiledmodel,
-      init_vals
-    ) |>
-      output_initialstate()
-  } else if (usestates == "current") {
-    x0 <- define_currentstate(
-      compiledmodel,
-      init_vals # filled with current values by user
-    ) |>
-      output_initialstate()
-  }
+                             method = "exact") {
+  x0 <- init_vals
 
   # rateeqns, transitions, parameters
   model_rates <- as.list(compiledmodel$modeloutstructions$processrates)
