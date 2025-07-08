@@ -1,23 +1,19 @@
-library(devtools)
-library(Matrix)
-library(dplyr)
-library(tibble)
-library(tidyr)
-library(tidyselect)
-library(purrr)
-library(stringr)
-library(deSolve)
-library(ggplot2)
-load_all("compModels")
+# Draft model as a function to replicate the modeling work done during the
+# Chicago Measles 2024 response. Creators: Catherine Herzog & Bradford Taylor.
 
+# https://www.sciencedirect.com/science/article/pii/S2468266723001305?via%3Dihub#sec1 # nolint
+# https://www.cdc.gov/mmwr/volumes/73/wr/mm7319a2.htm
+# https://github.com/CDCgov/measles-model-chicago-2024/tree/main
+
+devtools::load_all("compModels")
 # Replicating Chicago Measles Response 2024: same populations & parameters
 # Overview:
 
 # Simulation start date 2024-02-01, sim length 365 days, 10,000 sims/scenario
 # Parameters
-# sigma (latent period) = 8 days (mean)
-# infectious period = 5 days (mean),
-# r_0 = 25  (recall: beta/gamma = r0; also: beta*gamma = r0 = 25)
+# taue (latent period) = 8 days (mean)
+# tau (infectious period) = 5 days (mean),
+# r_0 = 25  (recall: beta/gamma = r0; also: beta*tau = r0 = 25)
 
 # Introduce 1 infected into age group 3 on 2024-02-22 (22 timesteps)
 # https://github.com/CDCgov/measles-model-chicago-2024/blob/c857905313192741ebff2c61d9a46ca57b808a42/seirMeasles/R/simulate.R#L26 #nolint
@@ -39,12 +35,14 @@ load_all("compModels")
 base_states <- c("S", "E", "I", "R", "Sv")
 measlesmodel <- define_states(base_states) |>
   add_infection("I", "S", "E", "beta") |>
-  add_transition("I", "R", meantime = "gamma*(1-int_eff)") |>
-  add_transition("E", "I", meantime = "sigma", chainlength = 2) |>
+  add_transition("I", "R", meantime = "tau*(1-int_eff)") |>
+  add_transition("E", "I", meantime = "taue", chainlength = 2) |>
   add_infection("I", "Sv", "E", "beta") |>
   add_group(groupnames = as.character(1:5))
 
-measlescompiled <- compilemodel(measlesmodel)
+measlescompiled <- compilemodel(measlesmodel) |>
+  trackincidence_byfeature(basestates = "I", trackname = "incI_cum_latent")
+
 measles_rates <- measlescompiled$modeloutstructions$processrates
 measles_peter <- measlescompiled$modeloutstructions$petermatrix
 measles_states <- measlescompiled$modeloutstructions$updatedstates
@@ -74,7 +72,7 @@ pre_import <- wrap_adaptivetau(
   vecpopsize,
   measlescompiled,
   rate_func = NULL,
-  c(beta = 5, gamma = 5, int_eff = 0, sigma = 8),
+  c(beta = 5, tau = 5, int_eff = 0, taue = 8),
   22,
   1,
   "adaptivetau"
@@ -98,7 +96,7 @@ import_prevacc <- wrap_adaptivetau(
   vecpopsize,
   measlescompiled,
   rate_func = NULL,
-  c(beta = 5, gamma = 5, int_eff = 0, sigma = 8),
+  c(beta = 5, tau = 5, int_eff = 0, taue = 8),
   15 + 7, # adding on immunity onset delay
   1,
   "adaptivetau"
@@ -187,7 +185,7 @@ postimport_vacc1 <- wrap_adaptivetau(
   vecpopsize,
   measlescompiled,
   rate_func = NULL,
-  c(beta = 5, gamma = 5, int_eff = 0.25, sigma = 8),
+  c(beta = 5, tau = 5, int_eff = 0.25, taue = 8),
   1, # immunity onset delay already added in previous sim
   1,
   "adaptivetau"
@@ -244,7 +242,7 @@ postimport_vacc2 <- wrap_adaptivetau(
   vecpopsize,
   measlescompiled,
   rate_func = NULL,
-  c(beta = 5, gamma = 5, int_eff = 0.25, sigma = 8),
+  c(beta = 5, tau = 5, int_eff = 0.25, taue = 8),
   1, # immunity onset delay already added in previous sim
   1,
   "adaptivetau"
@@ -301,37 +299,31 @@ postimport_vacc3 <- wrap_adaptivetau(
   vecpopsize,
   measlescompiled,
   rate_func = NULL,
-  c(beta = 5, gamma = 5, int_eff = 0.25, sigma = 8),
+  c(beta = 5, tau = 5, int_eff = 0.25, taue = 8),
   320, # remaining days, after immunity onset delay taken into account
   1,
   "adaptivetau"
 )
 
-# Stitching together the simulations
-# Edit start times of the simulated output files ahead of appending (rbind)
-import_prevacc_mod <- lapply(import_prevacc, function(df) {
-  df$time <- df$time + 22
-  df <- df[-1, ]
-  return(df)
-})
+# Stitching together the simulations to match complete model timeline
+pre_import_mod <- pre_import
+pre_import_mod <- pre_import_mod[-nrow(pre_import_mod), ]
 
-postimport_vacc1_mod <- lapply(postimport_vacc1, function(df) {
-  df$time <- df$time + (22 + 15 + 7)
-  df <- df[-1, ]
-  return(df)
-})
+import_prevacc_mod <- import_prevacc
+import_prevacc_mod$time <- import_prevacc_mod$time + 22
+import_prevacc_mod <- import_prevacc_mod[-nrow(import_prevacc_mod), ]
 
-postimport_vacc2_mod <- lapply(postimport_vacc2, function(df) {
-  df$time <- df$time + (22 + 15 + 7 + 1)
-  df <- df[-1, ]
-  return(df)
-})
+postimport_vacc1_mod <- postimport_vacc1
+postimport_vacc1_mod$time <- postimport_vacc1_mod$time + (22 + 15 + 7)
+postimport_vacc1_mod <- postimport_vacc1_mod[-nrow(postimport_vacc1_mod), ]
 
-postimport_vacc3_mod <- lapply(postimport_vacc3, function(df) {
-  df$time <- df$time + (22 + 15 + 7 + 1 + 1)
-  df <- df[-1, ]
-  return(df)
-})
+postimport_vacc2_mod <- postimport_vacc2
+postimport_vacc2_mod$time <- postimport_vacc2_mod$time + (22 + 15 + 7 + 1)
+postimport_vacc2_mod <- postimport_vacc2_mod[-nrow(postimport_vacc2_mod), ]
+
+postimport_vacc3_mod <- postimport_vacc3
+postimport_vacc3_mod$time <- postimport_vacc3_mod$time + (22 + 15 + 7 + 1 + 1)
+# don't remove last row on last sim
 
 all_dyn <- Map(
   rbind, pre_import, import_prevacc_mod, postimport_vacc1_mod,
@@ -339,6 +331,55 @@ all_dyn <- Map(
 )
 all_dyn
 
+dynamics <- all_dyn[[1]]
+# Incorporating case ascertainment delay
+# Creating obs_df to hold delayed times when incidence changes
+# NOTE: this will have to be plotted separately, as plot_stoch_model()
+# expects a list of data frames and handles simulation ids.
+
+# nolint start object_name_linter
+if (sum(dynamics$incI_cum_latent) > 0) {
+  incI_latent <- cuminc2inc(
+    dynamics$time,
+    dynamics$incI_cum_latent
+  )
+  dynamics$incI_latent <- incI_latent
+  incident_indices <- which(dynamics$incI_latent > 0)
+  time_mod <-
+    delaytime_exp(
+      dynamics[dynamics$"incI_latent" > 0, ]$time,
+      2.5
+    ) # config$params$case_ascertainment_delay)
+  obs_df1 <- data.frame(
+    time_report = time_mod,
+    incI_latent_d = dynamics[which(dynamics$incI_latent > 0), ]$incI_cum_latent
+  )
+  sub <- dynamics |> dplyr::select(time, incI_cum_latent, incI_latent)
+  obs_df <- dplyr::full_join(sub, obs_df1, by = c("time" = "time_report")) |>
+    dplyr::arrange(time)
+
+  # Looking at latent and delayed cumulative incidence
+  ggplot(obs_df, aes(x = time)) +
+    geom_line(aes(y = incI_cum_latent, color = "Latent")) +
+    geom_line(aes(y = incI_latent_d, color = "Observed")) +
+    theme_classic() +
+    labs(
+      x = "Time (days)",
+      y = "Cumulative Incidence",
+      title = "Chicago Measles 2024 Simulation: Incidence Dynamics"
+    ) +
+    scale_color_manual(
+      name = "",
+      values = c("Latent" = "blue", "Observed" = "red")
+    )
+} else {
+  print("No incidence in this simulation, returning empty obs_df")
+  obs_df <- data.frame(
+    time_report = numeric(0),
+    incI_latent = numeric(0)
+  )
+}
+# nolint end object_name_linter
 
 # Plot compartments
 plot_stoch_model(all_dyn,
@@ -369,4 +410,10 @@ plot_stoch_model(all_dyn,
   compartments = measles_states[grep("^(R_)", measles_states)],
   colors =
     colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(5)
+)
+
+plot_stoch_model(all_dyn,
+  compartments = measles_states[grep("incI_cum_latent", measles_states)],
+  colors =
+    colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(1)
 )
