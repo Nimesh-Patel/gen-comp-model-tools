@@ -12,8 +12,7 @@ wrap_adaptivetau(
   parameters,
   n_timesteps,
   n_sims,
-  method = "exact",
-  usestates = "initial"
+  method = "exact"
 )
 }
 \arguments{
@@ -32,12 +31,6 @@ wrap_adaptivetau(
 
 \item{method}{method to use in adaptivetau, defaults to "exact". Other option
 is "adaptivetau"}
-
-\item{usestates}{"initial" is default option to use the user supplied
-init_vals vector as as initial values, "current" option allows init_vals to
-be used as the current values  of the simulation for when the user needs to
-start from a spot other than initial (e.g. stitching together simulations
-with different time blocks of interventions)}
 }
 \value{
 list of data frames object of the data part of adaptivetau object

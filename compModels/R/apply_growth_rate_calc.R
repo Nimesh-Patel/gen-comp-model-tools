@@ -99,7 +99,7 @@ apply_growth_rate_calc <- function(output, time_var = NULL,
   output2 <- output |>
     dplyr::filter(dplyr::between(.data$time, lower_time, upper_time))
 
-  fit <- lm(stats::as.formula(formula_string), data = output2)
+  fit <- stats::lm(stats::as.formula(formula_string), data = output2)
   r <- fit$coef[["time"]]
   print(paste("Growth rate is:", r))
 
