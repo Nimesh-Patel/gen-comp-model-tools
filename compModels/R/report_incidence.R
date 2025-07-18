@@ -41,6 +41,7 @@ report_incidence <- function(t_incident,
 
   currtbefore <- t0
   incbefore <- inc0
+  newinc <- incbefore
 
   cnt <- 0
 
@@ -49,7 +50,9 @@ report_incidence <- function(t_incident,
     cnt <- cnt + 1
     currlogic <- (t_incident <= currtend)
     cuminc_allbefore <- cum_incidence[currlogic]
-    newinc <- cuminc_allbefore[length(cuminc_allbefore)]
+    if (length(cuminc_allbefore) > 0) {
+      newinc <- cuminc_allbefore[length(cuminc_allbefore)]
+    }
     reported_incidence[[cnt]] <- newinc - incbefore
     currtbefore <- currtend
     incbefore <- newinc
