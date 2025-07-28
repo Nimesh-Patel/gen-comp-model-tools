@@ -7,7 +7,7 @@
 #' @param x character vector.
 #' @param states list of values to replace
 #' @return character vector with replaced values
-#' @family intenal
+#' @family internal
 empty2states <- function(x, states) {
   if ("" %in% x) {
     x <- c(x[x != ""], states)

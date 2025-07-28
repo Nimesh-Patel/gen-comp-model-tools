@@ -19,6 +19,7 @@ Ensure updatedstates input has popsize column
 Other internal:
 \code{\link{apply_growth_rate_calc}()},
 \code{\link{cleanscale}()},
+\code{\link{empty2states}()},
 \code{\link{fixinput_chains}()},
 \code{\link{fixinput_groupnames}()},
 \code{\link{grabfromtbl}()},

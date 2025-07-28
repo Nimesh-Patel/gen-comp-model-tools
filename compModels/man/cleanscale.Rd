@@ -24,6 +24,7 @@ auto-generated during model compilation
 Other internal:
 \code{\link{apply_growth_rate_calc}()},
 \code{\link{check_inputpopsize}()},
+\code{\link{empty2states}()},
 \code{\link{fixinput_chains}()},
 \code{\link{fixinput_groupnames}()},
 \code{\link{grabfromtbl}()},
