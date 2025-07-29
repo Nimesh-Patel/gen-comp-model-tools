@@ -1,0 +1,434 @@
+---
+title: "Benchmarking compModels simulation wrapper functions"
+author: "Catherine Herzog uvw5@cdc.gov"
+format:
+    html:
+        toc: true
+code-fold: true
+---
+
+
+```{r packages}
+library(microbenchmark)
+devtools::load_all("../compModels")
+```
+
+## Motivation
+
+First pass at benchmarking the simulation functions for compModels to identify
+bottlenecks.
+
+
+## Comparing GillespieSSA and adaptivetau for a SIR Model
+
+```{r sirmodel}
+#| output: false
+base_states <- c("S", "I", "R")
+sir <- define_states(base_states) |>
+  add_infection("I", "S", "I", "beta") |>
+  add_transition("I", "R", "tau")
+sircompiled <- compilemodel(sir)
+sir_rates <- sircompiled$modeloutstructions$processrates
+sir_peter <- sircompiled$modeloutstructions$petermatrix
+sir_states <- sircompiled$modeloutstructions$updatedstates
+sir_init_vals <- c("S" = 999, "I" = 1, "R" = 0)
+sir_parameters <- c(beta = 2, tau = 1)
+```
+
+```{r benchmarking originals}
+mbm_sir <- microbenchmark(
+  "GillespieSSA::ssa.d" = {
+    GillespieSSA::ssa(
+      x0 = sir_init_vals,
+      a = sir_rates,
+      nu = matrix(as.numeric(sir_peter),
+        ncol = dim(sir_peter)[2],
+        nrow = dim(sir_peter)[1]
+      ),
+      parms = sir_parameters,
+      tf = 100,
+      method = GillespieSSA::ssa.d()
+    )
+  },
+  "adaptivetau::ssa.exact" = {
+    adaptivetau::ssa.exact(
+      init.values = sir_init_vals,
+      transitions = as.matrix(sir_peter),
+      rateFunc = generalized_rates(as.list(sir_rates)),
+      params = sir_parameters,
+      tf = 100
+    )
+  },
+  "adaptivetau::ssa.adaptivetau" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = sir_init_vals,
+      transitions = as.matrix(sir_peter),
+      rateFunc = generalized_rates(as.list(sir_rates)),
+      params = sir_parameters,
+      tf = 100
+    )
+  },
+  times = 10
+)
+mbm_sir
+autoplot(mbm_sir)
+```
+
+From this one can see that, as expected, adaptivetau is faster than Gillespie.
+Therefore the rest of the vignette will benchmark increasingly complex
+compModels compiled model objects with adaptivetau and
+compModels::wrap_adaptivetau().
+
+## Increasingly Complex Models with compModels
+Focusing on adaptivetau::adaptivetau(). See code for model details.
+
+```{r models}
+#| output: false
+# SEIR
+base_states <- c("S", "E", "I", "R")
+seir <- define_states(base_states) |>
+  add_infection("I", "S", "E", "beta") |>
+  add_transition("I", "R", "tau") |>
+  add_transition("E", "I", "taue")
+seircompiled <- compilemodel(seir)
+seir_rates <- seircompiled$modeloutstructions$processrates
+seir_peter <- seircompiled$modeloutstructions$petermatrix
+seir_states <- seircompiled$modeloutstructions$updatedstates
+seir_init_vals <- c("S" = 999, "E" = 0, "I" = 1, "R" = 0)
+seir_parameters <- c(beta = 2, tau = 1, taue = .5)
+
+# SEI2R
+base_states <- c("S", "E", "I", "R")
+sei2r <- define_states(base_states) |>
+  add_infection("I", "S", "E", "beta") |>
+  add_transition("I", "R", "tau", chainlength = 2) |>
+  add_transition("E", "I", "taue")
+sei2rcompiled <- compilemodel(sei2r)
+sei2r_rates <- sei2rcompiled$modeloutstructions$processrates
+sei2r_peter <- sei2rcompiled$modeloutstructions$petermatrix
+sei2r_states <- sei2rcompiled$modeloutstructions$updatedstates
+sei2r_init_vals <- define_popsize(sei2rcompiled) |>
+  setpopsize_byfeature(999, "S") |>
+  setpopsize_byname(c("I_chainid1X1" = 1)) |>
+  dplyr::pull(popsize)
+names(sei2r_init_vals) <- sei2r_states
+sei2r_parameters <- c(beta = 2, tau = 1, taue = .5)
+
+# SEI2{RH}
+base_states <- c("S", "E", "I", "R", "H")
+sei2rh <- define_states(base_states) |>
+  add_infection("I", "S", "E", "beta") |>
+  add_transition("I", c("R", "H"), "tau",
+    chainlength = 2, forkprobability = c("1-probH", "probH")
+  ) |>
+  add_transition("E", "I", "taue")
+sei2rhcompiled <- compilemodel(sei2rh)
+sei2rh_rates <- sei2rhcompiled$modeloutstructions$processrates
+sei2rh_peter <- sei2rhcompiled$modeloutstructions$petermatrix
+sei2rh_states <- sei2rhcompiled$modeloutstructions$updatedstates
+sei2rh_init_vals <- define_popsize(sei2rhcompiled) |>
+  setpopsize_byfeature(999, "S") |>
+  setpopsize_byname(c("I_chainid1X1" = 1)) |>
+  dplyr::pull(popsize)
+names(sei2rh_init_vals) <- sei2rh_states
+sei2rh_parameters <- c(beta = 2, tau = 1, taue = .5, probH = .2)
+
+# SEI2R and Treatment
+base_states <- c("S", "E", "I", "R")
+sei2r_treat <- define_states(base_states) |>
+  add_infection("I", "S", "E", "beta") |>
+  add_transition("I", "R", "tau", chainlength = 2) |>
+  add_transition("E", "I", "taue") |>
+  add_transition("I", "R", "taut")
+sei2rt_compiled <- compilemodel(sei2r_treat)
+sei2rt_rates <- sei2rt_compiled$modeloutstructions$processrates
+sei2rt_peter <- sei2rt_compiled$modeloutstructions$petermatrix
+sei2rt_states <- sei2rt_compiled$modeloutstructions$updatedstates
+sei2rt_init_vals <- define_popsize(sei2rt_compiled) |>
+  setpopsize_byfeature(999, "S") |>
+  setpopsize_byname(c("I_chainid1X1" = 1)) |>
+  dplyr::pull(popsize)
+names(sei2rt_init_vals) <- sei2rt_states
+sei2rt_parameters <- c(beta = 2, tau = 1, taue = .5, taut = 2)
+
+# Metapopulations
+sir_meta <- define_states(c("S", "I", "R")) |>
+  add_infection("I", "S", "I", "beta") |>
+  add_transition("I", "R", "tau") |>
+  define_metapopulations(
+    metapopulation = c("R0", "R0times2"),
+    scaleinteractions = c(1, 2)
+  ) |>
+  add_travel("mu")
+sirmeta <- compilemodel(sir_meta)
+sirmeta_rates <- sirmeta$modeloutstructions$processrates
+sirmeta_peter <- sirmeta$modeloutstructions$petermatrix
+sirmeta_states <- sirmeta$modeloutstructions$updatedstates
+sirmeta_init_vals <- define_popsize(sirmeta) |>
+  setpopsize_byfeature(999, "S") |>
+  setpopsize_byfeature(1, "I") |>
+  dplyr::pull(popsize)
+names(sirmeta_init_vals) <- sirmeta_states
+sirmeta_parameters <- c(beta = 2, tau = 1, mu = .1)
+
+# Incorporating Groups
+# One Group
+sir1group <- define_states(c("S", "I", "R")) |>
+  add_infection("I", "S", "I", "beta") |>
+  add_transition("I", "R", "tau") |>
+  add_group(c("Social", "Antisocial"), scaleinteractions = c(2, 1))
+sirg1comp <- compilemodel(sir1group)
+sirg1_rates <- sirg1comp$modeloutstructions$processrates
+sirg1_peter <- sirg1comp$modeloutstructions$petermatrix
+sirg1_states <- sirg1comp$modeloutstructions$updatedstates
+sirg1_init_vals <- define_popsize(sirg1comp) |>
+  setpopsize_byfeature(999, "S") |>
+  setpopsize_byfeature(1, "I") |>
+  dplyr::pull(popsize)
+names(sirg1_init_vals) <- sirg1_states
+sirg1_parameters <- c(beta = 1.5, tau = 1)
+
+# Two Groups
+sir2group <- define_states(c("S", "I", "R")) |>
+  add_infection("I", "S", "I", "beta") |>
+  add_transition("I", "R", "tau") |>
+  add_group(c("Young", "Old"),
+    grouptype = "Age",
+    scaleinteractions = c(2, 1)
+  ) |>
+  add_group(c("Patient", "HCW"),
+    grouptype = "Hospital",
+    scaleinteractions = c(3, 4)
+  ) |>
+  compilemodel()
+sirg2_rates <- sir2group$modeloutstructions$processrates
+sirg2_peter <- sir2group$modeloutstructions$petermatrix
+sirg2_states <- sir2group$modeloutstructions$updatedstates
+sirg2_init_vals <- define_popsize(sir2group) |>
+  setpopsize_byfeature(999, "S") |>
+  setpopsize_byfeature(1, "I") |>
+  dplyr::pull(popsize)
+names(sirg2_init_vals) <- sirg2_states
+sirg2_parameters <- c(beta = 2, tau = 1)
+
+# Full model
+sir_full <- define_states(c("S", "I", "R")) |>
+  define_metapopulations(metapopulation = c("UK", "USA")) |>
+  add_travel("mu") |>
+  add_group(c("Young", "Old"), grouptype = "Age") |>
+  add_group(c("Patient", "HCW"), grouptype = "Hospital") |>
+  add_infection("I", "S", "I", "beta") |>
+  add_transition("I", "R", "tau", chainlength = 3)
+sirfullcomp <- compilemodel(sir_full)
+sirfull_rates <- sirfullcomp$modeloutstructions$processrates
+sirfull_peter <- sirfullcomp$modeloutstructions$petermatrix
+sirfull_states <- sirfullcomp$modeloutstructions$updatedstates
+sirfull_init_vals <- define_popsize(sirfullcomp) |>
+  setpopsize_byfeature(999, "S") |>
+  setpopsize_byfeature(1, "I") |> # could set a specific grp
+  dplyr::pull(popsize)
+names(sirfull_init_vals) <- sirfull_states
+sirfull_parameters <- c(beta = 2, tau = 1, mu = 0.1)
+```
+
+## Benchmarking complex models with adaptivetau::ssa.adaptivetau
+```{r adaptivetau}
+mbm_tau <- microbenchmark(
+  "adaptivetau: SIR" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = sir_init_vals,
+      transitions = as.matrix(sir_peter),
+      rateFunc = generalized_rates(as.list(sir_rates)),
+      params = sir_parameters,
+      tf = 100
+    )
+  },
+  "adaptivetau: SEIR" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = seir_init_vals,
+      transitions = as.matrix(seir_peter),
+      rateFunc = generalized_rates(as.list(seir_rates)),
+      params = seir_parameters,
+      tf = 100
+    )
+  },
+  "adaptivetau: SEI2R" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = sei2r_init_vals,
+      transitions = as.matrix(sei2r_peter),
+      rateFunc = generalized_rates(as.list(sei2r_rates)),
+      params = sei2r_parameters,
+      tf = 100
+    )
+  },
+  "adaptivetau: SEI2{RH}" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = sei2rh_init_vals,
+      transitions = as.matrix(sei2rh_peter),
+      rateFunc = generalized_rates(as.list(sei2rh_rates)),
+      params = sei2rh_parameters,
+      tf = 100
+    )
+  },
+  "adaptivetau: SEI2R Treat" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = sei2rt_init_vals,
+      transitions = as.matrix(sei2rt_peter),
+      rateFunc = generalized_rates(as.list(sei2rt_rates)),
+      params = sei2rt_parameters,
+      tf = 100
+    )
+  },
+  "adaptivetau: SIR Metapop" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = sirmeta_init_vals,
+      transitions = as.matrix(sirmeta_peter),
+      rateFunc = generalized_rates(as.list(sirmeta_rates)),
+      params = sirmeta_parameters,
+      tf = 100
+    )
+  },
+  "adaptivetau: SIR 1 Grp" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = sirg1_init_vals,
+      transitions = as.matrix(sirg1_peter),
+      rateFunc = generalized_rates(as.list(sirg1_rates)),
+      params = sirg1_parameters,
+      tf = 100
+    )
+  },
+  "adaptivetau: SIR 2 Grps" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = sirg2_init_vals,
+      transitions = as.matrix(sirg2_peter),
+      rateFunc = generalized_rates(as.list(sirg2_rates)),
+      params = sirg2_parameters,
+      tf = 100
+    )
+  },
+  "adaptivetau: SIR Full" = {
+    adaptivetau::ssa.adaptivetau(
+      init.values = sirfull_init_vals,
+      transitions = as.matrix(sirfull_peter),
+      rateFunc = generalized_rates(as.list(sirfull_rates)),
+      params = sirfull_parameters,
+      tf = 100
+    )
+  },
+  times = 10
+)
+
+mbm_tau
+autoplot(mbm_tau)
+```
+
+
+## Benchmarking complex models with compModels::wrap_adaptivetau
+
+```{r wrap_adaptivetau}
+mbm_wraptau <- microbenchmark(
+  "wrap_adaptivetau: SIR" = {
+    wrap_adaptivetau(
+      init_vals = sir_init_vals,
+      compiledmodel = sircompiled,
+      rate_func = NULL,
+      parameters = sir_parameters,
+      n_timesteps = 100,
+      n_sims = 1,
+      method = "adaptivetau"
+    )
+  },
+  "wrap_adaptivetau: SEIR" = {
+    wrap_adaptivetau(
+      init_vals = seir_init_vals,
+      compiledmodel = seircompiled,
+      rate_func = NULL,
+      parameters = seir_parameters,
+      n_timesteps = 100,
+      n_sims = 1,
+      method = "adaptivetau"
+    )
+  },
+  "wrap_adaptivetau: SEI2R" = {
+    wrap_adaptivetau(
+      init_vals = sei2r_init_vals,
+      compiledmodel = sei2rcompiled,
+      rate_func = NULL,
+      parameters = sei2r_parameters,
+      n_timesteps = 100,
+      n_sims = 1,
+      method = "adaptivetau"
+    )
+  },
+  "wrap_adaptivetau: SEI2{RH}" = {
+    wrap_adaptivetau(
+      init_vals = sei2rh_init_vals,
+      compiledmodel = sei2rhcompiled,
+      rate_func = NULL,
+      parameters = sei2rh_parameters,
+      n_timesteps = 100,
+      n_sims = 1,
+      method = "adaptivetau"
+    )
+  },
+  "wrap_adaptivetau: SEI2R Treat" = {
+    wrap_adaptivetau(
+      init_vals = sei2rt_init_vals,
+      compiledmodel = sei2rt_compiled,
+      rate_func = NULL,
+      parameters = sei2rt_parameters,
+      n_timesteps = 100,
+      n_sims = 1,
+      method = "adaptivetau"
+    )
+  },
+  "wrap_adaptivetau: SIR Metapop" = {
+    wrap_adaptivetau(
+      init_vals = sirmeta_init_vals,
+      compiledmodel = sirmeta,
+      rate_func = NULL,
+      parameters = sirmeta_parameters,
+      n_timesteps = 100,
+      n_sims = 1,
+      method = "adaptivetau"
+    )
+  },
+  "wrap_adaptivetau: SIR 1 Grp" = {
+    wrap_adaptivetau(
+      init_vals = sirg1_init_vals,
+      compiledmodel = sirg1comp,
+      rate_func = NULL,
+      parameters = sirg1_parameters,
+      n_timesteps = 100,
+      n_sims = 1,
+      method = "adaptivetau"
+    )
+  },
+  "wrap_adaptivetau: SIR 2 Grps" = {
+    wrap_adaptivetau(
+      init_vals = sirg2_init_vals,
+      compiledmodel = sir2group,
+      rate_func = NULL,
+      parameters = sirg2_parameters,
+      n_timesteps = 100,
+      n_sims = 1,
+      method = "adaptivetau"
+    )
+  },
+  "wrap_adaptivetau: SIR Full" = {
+    wrap_adaptivetau(
+      init_vals = sirfull_init_vals,
+      compiledmodel = sirfullcomp,
+      rate_func = NULL,
+      parameters = sirfull_parameters,
+      n_timesteps = 100,
+      n_sims = 1,
+      method = "adaptivetau"
+    )
+  },
+  times = 10
+)
+
+mbm_wraptau
+autoplot(mbm_wraptau)
+```

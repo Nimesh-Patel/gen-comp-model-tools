@@ -79,7 +79,10 @@ ggplot2::ggplot(dyntplt, aes(x = t, y = density, color = name)) +
 
 
 # Running with wrap_adaptivetau for multiple sims
-dyn2 <- wrap_adaptivetau(x0, sircompiled, rate_func = NULL, parameters, 25, 10)
+dyn2 <- wrap_adaptivetau(init_vals, sircompiled,
+  rate_func = NULL,
+  parameters, 25, 10
+)
 plot_stoch_model(dyn2, compartments = sir_states)
 
 
