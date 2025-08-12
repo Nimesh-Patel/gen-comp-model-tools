@@ -10,6 +10,8 @@
 #' example: base_states <- c("S", "E", "I", "R")
 #' @return vector of strings formatted to describe draws of numbers
 #' changing between states
+#' @family model_building
+#' @export
 odin_draws <- function(compiled_model, states_vec) {
   get_draws <- function(state) {
     d <- compiled_model$modelinstructions$tblprocesses |>

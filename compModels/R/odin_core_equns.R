@@ -9,6 +9,8 @@
 #' @param states_vec vector of states in model as character strings
 #' example: base_states <- c("S", "E", "I", "R")
 #' @return vector of strings formatted to describe core equation
+#' @family model_building
+#' @export
 odin_core_eqns <- function(compiled_model, states_vec) {
   get_ops <- function(state) {
     compiled_model$modelinstructions$tblprocesses |>

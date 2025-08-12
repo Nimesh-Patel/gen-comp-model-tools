@@ -32,3 +32,12 @@ Takes input from compiledmodel and additional model information,
 creates model in format for odin (needs to be saved as an R file),
 runs odin model, returns results in dataframe
 }
+\seealso{
+Other simulation:
+\code{\link{gillespie}()},
+\code{\link{run_adaptivetau}()},
+\code{\link{wrap_adaptivetau}()},
+\code{\link{wrap_gillespie}()},
+\code{\link{wrap_ode}()}
+}
+\concept{simulation}

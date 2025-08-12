@@ -6,6 +6,8 @@
 #' @param model_pop model population information from
 #' compiled model $modelinstructions$tblntotal
 #' @return string formatted to calculate total population
+#' @family calculations
+#' @export
 odin_tot_pop <- function(model_pop) {
   glue::glue("Ntotal <- {model_pop$totalpop}")
 }

@@ -17,3 +17,11 @@ string formatted to calculate total population
 Total value is called N and is the sum of provided states
 Total N can then be used in model calculations
 }
+\seealso{
+Other calculations:
+\code{\link{calculate_initial_growth_rate}()},
+\code{\link{report_incidence}()},
+\code{\link{trackincidence_byfeature}()},
+\code{\link{trackincidence_byname}()}
+}
+\concept{calculations}

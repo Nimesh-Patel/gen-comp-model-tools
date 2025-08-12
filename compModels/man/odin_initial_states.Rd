@@ -21,3 +21,11 @@ Format needs to be initial(state) <- value for each value
 Need to provide a vector of states and a named vector of initial values.
 If a state is provided with no value, it will be set to 0.
 }
+\seealso{
+Other initial_conditions:
+\code{\link{define_initialstate}()},
+\code{\link{define_popsize}()},
+\code{\link{define_states}()},
+\code{\link{output_initialstate}()}
+}
+\concept{initial_conditions}

@@ -22,6 +22,7 @@ Initializes model instructions with given base states
 Other initial_conditions:
 \code{\link{define_initialstate}()},
 \code{\link{define_popsize}()},
+\code{\link{odin_initial_states}()},
 \code{\link{output_initialstate}()}
 }
 \concept{initial_conditions}

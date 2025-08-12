@@ -22,3 +22,35 @@ Core equations describes the movements between states in the model
 \details{
 Format needs to be: update(state) <- state - n_exit + n_enter
 }
+\seealso{
+Other model_building:
+\code{\link{add_group}()},
+\code{\link{add_grouptransition}()},
+\code{\link{add_infection}()},
+\code{\link{add_interaction}()},
+\code{\link{add_metapopulations}()},
+\code{\link{add_replacement}()},
+\code{\link{add_transition}()},
+\code{\link{add_travel}()},
+\code{\link{addpopsize_byfeature}()},
+\code{\link{addpopsize_byname}()},
+\code{\link{combine_groups}()},
+\code{\link{compilemodel}()},
+\code{\link{define_metapopulations}()},
+\code{\link{filterpopsize_byfeature}()},
+\code{\link{generalized_rates}()},
+\code{\link{make_metapopulations}()},
+\code{\link{movefracpopsize_byfeature}()},
+\code{\link{movefracpopsize_byname}()},
+\code{\link{movepopsize_byfeature}()},
+\code{\link{movepopsize_byname}()},
+\code{\link{movethresholdpopsize_byfeature}()},
+\code{\link{movethresholdpopsize_byname}()},
+\code{\link{odin_draws}()},
+\code{\link{odin_probs}()},
+\code{\link{removepopsize_byfeature}()},
+\code{\link{removepopsize_byname}()},
+\code{\link{setpopsize_byfeature}()},
+\code{\link{setpopsize_byname}()}
+}
+\concept{model_building}

@@ -32,6 +32,7 @@ Aggregate incidence at reporting times
 \seealso{
 Other calculations:
 \code{\link{calculate_initial_growth_rate}()},
+\code{\link{odin_tot_pop}()},
 \code{\link{trackincidence_byfeature}()},
 \code{\link{trackincidence_byname}()}
 }

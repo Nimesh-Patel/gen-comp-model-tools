@@ -9,6 +9,8 @@
 #' @param initial_states_vec named vector of initial values for each state
 #' example: initial_states_vec <- c("S" = 999, "E" = 0, "I" = 1, "R" = 0)
 #' @return vector of strings formatted for odin initial states
+#' @family initial_conditions
+#' @export
 odin_initial_states <- function(states_vec, initial_states_vec) {
   glue::glue(
     "initial({states_vec}) <-",

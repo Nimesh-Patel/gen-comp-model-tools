@@ -43,6 +43,7 @@ Other simulation:
 \code{\link{gillespie}()},
 \code{\link{wrap_adaptivetau}()},
 \code{\link{wrap_gillespie}()},
-\code{\link{wrap_ode}()}
+\code{\link{wrap_ode}()},
+\code{\link{wrap_odin}()}
 }
 \concept{simulation}

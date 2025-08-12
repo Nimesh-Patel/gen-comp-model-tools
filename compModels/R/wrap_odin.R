@@ -13,6 +13,8 @@
 #' @param t0 initial time for model run, default is 0
 #'
 #' @return dataframe of results from odin model run
+#' @family simulation
+#' @export
 wrap_odin <- function(init_vals,
                       compiledmodel,
                       param_vector,

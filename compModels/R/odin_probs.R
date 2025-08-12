@@ -5,6 +5,8 @@
 #' @param compiled_model compiled model object
 #' created by compModels function compilemodel()
 #' @return vector of strings formatted to describe transition probabilities
+#' @family model_building
+#' @export
 odin_probs <- function(compiled_model) {
   compiled_model$modelinstructions$tblprocesses |>
     dplyr::mutate(

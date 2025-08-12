@@ -21,6 +21,7 @@ Useful as input to deSolve
 Other initial_conditions:
 \code{\link{define_initialstate}()},
 \code{\link{define_popsize}()},
-\code{\link{define_states}()}
+\code{\link{define_states}()},
+\code{\link{odin_initial_states}()}
 }
 \concept{initial_conditions}

@@ -104,6 +104,7 @@ calculate_initial_growth_rate(modelout,
 }
 \seealso{
 Other calculations:
+\code{\link{odin_tot_pop}()},
 \code{\link{report_incidence}()},
 \code{\link{trackincidence_byfeature}()},
 \code{\link{trackincidence_byname}()}
