@@ -36,10 +36,10 @@ plot_stoch_model(dyn2, compartments = sir_states)
 
 
 # Bringing in configuration file for use with griddleR
-readLines("scripts/sir_params.yaml") |>
+readLines("scripts/link_to_other_tools/sir_params.yaml") |>
   paste(collapse = "\n") |>
   cat()
-parameter_sets <- griddleR::read_griddle("scripts/sir_params.yaml")
+parameter_sets <- griddleR::read_griddle("scripts/link_to_other_tools/sir_params.yaml") # nolint
 cat(yaml::as.yaml(parameter_sets))
 
 
@@ -86,7 +86,7 @@ double_wrap_ode <- function(parameter_set,
   # arguments for wrap_ode are:
   # wrap_ode <- function(y, times, compiledmodel, parms) {
   result <- wrap_ode(
-    y = y,
+    x0 = y,
     times = seq(start_time, max_time, by = times_by),
     compiledmodel = compiledmodel,
     parms = parameter_set

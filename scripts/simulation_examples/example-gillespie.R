@@ -11,8 +11,51 @@ library(stringr)
 library(deSolve)
 library(ggplot2)
 # load package w/o installing.
-# SIRmodelbuilder functions are now in compModels/R
 load_all("compModels")
+
+# Loading a modified wrap_adaptivetau function to enable run of any model below
+# in which base states get modified (eg chains, groups, metapopulations)
+# This may get incorporated into compModels in the near future
+wrap_gillespie <- function(init_vals, compiledmodel, parameters, n_timesteps,
+                           n_sims) {
+  x0 <- init_vals
+  model_rates <- compiledmodel$modeloutstructions$processrates # propensity
+  model_peter <- compiledmodel$modeloutstructions$petermatrix # change matrix
+  parameters <- parameters
+
+  # Ensure x0 matches model dimensions (nu rows)
+  if (length(init_vals) != nrow(model_peter)) {
+    x0_tbl <- define_initialstate(compiledmodel, init_vals)
+    x0 <- x0_tbl$X0
+    names(x0) <- x0_tbl$updatedstate
+  } else {
+    x0 <- init_vals
+    if (is.null(names(x0))) {
+      names(x0) <- compiledmodel$modeloutstructions$updatedstates
+    }
+  }
+
+  nu <- matrix(as.numeric(model_peter),
+    ncol = dim(model_peter)[2],
+    nrow = dim(model_peter)[1]
+  )
+  # rownames(nu) <- names(x0) #nolint does not appear needed
+
+  t <- n_timesteps
+
+  sims <- lapply(1:n_sims, function(i) {
+    current_parameters <- parameters
+
+    sim_data <- GillespieSSA::ssa(
+      x0 = x0,
+      a = model_rates,
+      nu = nu,
+      parms = current_parameters,
+      tf = t,
+      method = GillespieSSA::ssa.d()
+    )$data |> data.frame()
+  })
+}
 
 
 # SIR instructions
@@ -57,7 +100,7 @@ seir_peter <- seircompiled$modeloutstructions$petermatrix
 seir_states <- seircompiled$modeloutstructions$updatedstates
 
 dyn3 <- wrap_gillespie(
-  c("S" = 999, "I" = 1, "R" = 0, "E" = 0),
+  c("S" = 999, "E" = 1, "I" = 1, "R" = 0),
   seircompiled,
   c(beta = 2, tau = 1, taue = .5),
   25,
@@ -79,13 +122,17 @@ sei2r_peter <- sei2rcompiled$modeloutstructions$petermatrix
 sei2r_states <- sei2rcompiled$modeloutstructions$updatedstates
 
 dyn4 <- wrap_gillespie(
-  c("S" = 999, "I" = 1, "R" = 0, "E" = 0),
+  c("S" = 999, "E" = 1, "I" = 1, "R" = 0),
   sei2rcompiled,
   c(beta = 2, tau = 1, taue = .5),
   25,
   10
 )
-plot_stoch_model(dyn4, compartments = c("S", "E", "I_chain1", "I_chain2", "R"))
+plot_stoch_model(dyn4, compartments = c(
+  "S", "E",
+  "I_chainid1X1", "I_chainid1X2",
+  "R"
+))
 
 # SE-Pro-I2R with prodromal period
 base_states <- c("S", "E", "Pro", "I", "R")
@@ -101,7 +148,7 @@ sepi2r_peter <- sepi2rcompiled$modeloutstructions$petermatrix
 sepi2r_states <- sepi2rcompiled$modeloutstructions$updatedstates
 
 dyn4p <- wrap_gillespie(
-  c("S" = 999, "I" = 1, "R" = 0, "E" = 0),
+  c("S" = 999, "E" = 0, "I" = 1, "R" = 0),
   sepi2rcompiled,
   c(beta = 2, beta_pro = 2.5, tau = 1, taue = .5, taup = 0.6),
   25,
@@ -109,7 +156,7 @@ dyn4p <- wrap_gillespie(
 )
 plot_stoch_model(dyn4p, compartments = c(
   "S", "E", "Pro",
-  "I_chain1", "I_chain2", "R"
+  "I_chainid1X1", "I_chainid1X2", "R"
 ))
 
 
@@ -127,14 +174,14 @@ sei2rh_peter <- sei2rhcompiled$modeloutstructions$petermatrix
 sei2rh_states <- sei2rhcompiled$modeloutstructions$updatedstates
 
 dyn5 <- wrap_gillespie(
-  c("S" = 999, "I" = 1, "R" = 0, "E" = 0, "H" = 0),
+  c("S" = 999, "E" = 0, "I" = 1, "R" = 0, "H" = 0),
   sei2rhcompiled,
   c(beta = 2, tau = 1, taue = .5, probH = .2),
   25,
   10
 )
 plot_stoch_model(dyn5, compartments = c(
-  "S", "E", "I_chain1", "I_chain2",
+  "S", "E", "I_chainid1X1", "I_chainid1X2",
   "R", "H"
 ))
 
@@ -152,7 +199,7 @@ sei2r_treat_peter <- sei2r_treatcompiled$modeloutstructions$petermatrix
 sei2r_treat_states <- sei2r_treatcompiled$modeloutstructions$updatedstates
 
 dyn6 <- wrap_gillespie(
-  c("S" = 999, "I" = 1, "R" = 0, "E" = 0),
+  c("S" = 999, "E" = 0, "I" = 1, "R" = 0),
   sei2r_treatcompiled,
   c(beta = 2, tau = 1, taue = .5, taut = 2),
   25,
@@ -165,8 +212,8 @@ sirmeta <- define_states(c("S", "I", "R")) |>
   add_infection("I", "S", "I", "beta") |>
   add_transition("I", "R", "tau") |>
   define_metapopulations(
-    metapop_names = c("R0", "R0times2"),
-    interactionscale = c(1, 2)
+    metapopulation = c("R0", "R0times2"),
+    scaletransitions = c(1, 2)
   ) |>
   add_travel("mu")
 outmeta <- compilemodel(sirmeta)
@@ -196,7 +243,10 @@ plot_stoch_model(dyn7, compartments = c(
 sir1group <- define_states(c("S", "I", "R")) |>
   add_infection("I", "S", "I", "beta") |>
   add_transition("I", "R", "tau") |>
-  add_group(c("Social", "Antisocial"), interactionscale = c(2, 1))
+  add_group(
+    groupname = c("Social", "Antisocial"),
+    scaleprocessbyname = list(infection = c(2, 1))
+  )
 sir1groupcomp <- compilemodel(sir1group)
 sir1groupcomp_rates <- sir1groupcomp$modeloutstructions$processrates
 sir1groupcomp_peter <- sir1groupcomp$modeloutstructions$petermatrix
@@ -211,25 +261,27 @@ dyn8 <- wrap_gillespie(
 )
 
 plot_stoch_model(dyn8, compartments = c(
-  "S_groupSocial",
-  "I_groupSocial",
-  "R_groupSocial",
-  "S_groupAntisocial",
-  "I_groupAntisocial",
-  "R_groupAntisocial"
+  "S_dummygroup1Social",
+  "I_dummygroup1Social",
+  "R_dummygroup1Social",
+  "S_dummygroup1Antisocial",
+  "I_dummygroup1Antisocial",
+  "R_dummygroup1Antisocial"
 ))
 
 # Two Groups
 sir2group <- define_states(c("S", "I", "R")) |>
   add_infection("I", "S", "I", "beta") |>
   add_transition("I", "R", "tau") |>
-  add_group(c("Young", "Old"),
+  add_group(
+    groupname = c("Young", "Old"),
     grouptype = "Age",
-    interactionscale = c(2, 1)
+    scaleprocessbyname = list(infection = c(2, 1))
   ) |>
-  add_group(c("Patient", "HCW"),
+  add_group(
+    groupname = c("Patient", "HCW"),
     grouptype = "Hospital",
-    interactionscale = c(3, 4)
+    scaleprocessbyname = list(infection = c(3, 4))
   ) |>
   compilemodel()
 sir2group_rates <- sir2group$modeloutstructions$processrates
@@ -246,18 +298,18 @@ dyn9 <- wrap_gillespie(
 
 plot_stoch_model(dyn9,
   compartments = c(
-    "S_AgeYoung_HospitalPatient",
-    "I_AgeYoung_HospitalPatient",
-    "R_AgeYoung_HospitalPatient",
-    "S_AgeOld_HospitalPatient",
-    "I_AgeOld_HospitalPatient",
-    "R_AgeOld_HospitalPatient",
-    "S_AgeYoung_HospitalHCW",
-    "I_AgeYoung_HospitalHCW",
-    "R_AgeYoung_HospitalHCW",
-    "S_AgeOld_HospitalHCW",
-    "I_AgeOld_HospitalHCW",
-    "R_AgeOld_HospitalHCW"
+    "S_AgeYoung",
+    "I_AgeYoung",
+    "R_AgeYoung",
+    "S_AgeOld",
+    "I_AgeOld",
+    "R_AgeOld",
+    "S_HospitalHCW",
+    "I_HospitalHCW",
+    "R_HospitalHCW",
+    "S_HospitalPatient",
+    "I_HospitalPatient",
+    "R_HospitalPatient"
   ),
   colors = colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(12)
 )
@@ -265,7 +317,7 @@ plot_stoch_model(dyn9,
 
 # Full model
 sirfull <- define_states(c("S", "I", "R")) |>
-  define_metapopulations(metapop_names = c("UK", "USA")) |>
+  define_metapopulations(metapopulation = c("UK", "USA")) |>
   add_travel("mu") |>
   add_group(c("Young", "Old"), grouptype = "Age") |>
   add_group(c("Patient", "HCW"), grouptype = "Hospital") |>
@@ -287,46 +339,46 @@ dyn10 <- wrap_gillespie(
 
 plot_stoch_model(dyn10,
   compartments = c(
-    "S_AgeYoung_HospitalPatient_metapopulationUK",
-    "S_AgeYoung_HospitalPatient_metapopulationUSA",
-    "I_AgeYoung_HospitalPatient_metapopulationUK_chain1",
-    "I_AgeYoung_HospitalPatient_metapopulationUK_chain2",
-    "I_AgeYoung_HospitalPatient_metapopulationUK_chain3",
-    "I_AgeYoung_HospitalPatient_metapopulationUSA_chain1",
-    "I_AgeYoung_HospitalPatient_metapopulationUSA_chain2",
-    "I_AgeYoung_HospitalPatient_metapopulationUSA_chain3",
-    "R_AgeYoung_HospitalPatient_metapopulationUK",
-    "R_AgeYoung_HospitalPatient_metapopulationUSA",
-    "S_AgeOld_HospitalPatient_metapopulationUK",
-    "S_AgeOld_HospitalPatient_metapopulationUSA",
-    "I_AgeOld_HospitalPatient_metapopulationUK_chain1",
-    "I_AgeOld_HospitalPatient_metapopulationUK_chain2",
-    "I_AgeOld_HospitalPatient_metapopulationUK_chain3",
-    "I_AgeOld_HospitalPatient_metapopulationUSA_chain1",
-    "I_AgeOld_HospitalPatient_metapopulationUSA_chain2",
-    "I_AgeOld_HospitalPatient_metapopulationUSA_chain3",
-    "R_AgeOld_HospitalPatient_metapopulationUK",
-    "R_AgeOld_HospitalPatient_metapopulationUSA",
-    "S_AgeYoung_HospitalHCW_metapopulationUK",
-    "S_AgeYoung_HospitalHCW_metapopulationUSA",
-    "I_AgeYoung_HospitalHCW_metapopulationUK_chain1",
-    "I_AgeYoung_HospitalHCW_metapopulationUK_chain2",
-    "I_AgeYoung_HospitalHCW_metapopulationUK_chain3",
-    "I_AgeYoung_HospitalHCW_metapopulationUSA_chain1",
-    "I_AgeYoung_HospitalHCW_metapopulationUSA_chain2",
-    "I_AgeYoung_HospitalHCW_metapopulationUSA_chain3",
-    "R_AgeYoung_HospitalHCW_metapopulationUK",
-    "R_AgeYoung_HospitalHCW_metapopulationUSA",
-    "S_AgeOld_HospitalHCW_metapopulationUK",
-    "S_AgeOld_HospitalHCW_metapopulationUSA",
-    "I_AgeOld_HospitalHCW_metapopulationUK_chain1",
-    "I_AgeOld_HospitalHCW_metapopulationUK_chain2",
-    "I_AgeOld_HospitalHCW_metapopulationUK_chain3",
-    "I_AgeOld_HospitalHCW_metapopulationUSA_chain1",
-    "I_AgeOld_HospitalHCW_metapopulationUSA_chain2",
-    "I_AgeOld_HospitalHCW_metapopulationUSA_chain3",
-    "R_AgeOld_HospitalHCW_metapopulationUK",
-    "R_AgeOld_HospitalHCW_metapopulationUSA"
+    "I_AgeOld_metapopulationUK_chainid1X1",
+    "I_AgeOld_metapopulationUK_chainid1X2",
+    "I_AgeOld_metapopulationUK_chainid1X3",
+    "I_AgeOld_metapopulationUSA_chainid1X1",
+    "I_AgeOld_metapopulationUSA_chainid1X2",
+    "I_AgeOld_metapopulationUSA_chainid1X3",
+    "I_AgeYoung_metapopulationUK_chainid1X1",
+    "I_AgeYoung_metapopulationUK_chainid1X2",
+    "I_AgeYoung_metapopulationUK_chainid1X3",
+    "I_AgeYoung_metapopulationUSA_chainid1X1",
+    "I_AgeYoung_metapopulationUSA_chainid1X2",
+    "I_AgeYoung_metapopulationUSA_chainid1X3",
+    "I_HospitalHCW_metapopulationUK_chainid1X1",
+    "I_HospitalHCW_metapopulationUK_chainid1X2",
+    "I_HospitalHCW_metapopulationUK_chainid1X3",
+    "I_HospitalHCW_metapopulationUSA_chainid1X1",
+    "I_HospitalHCW_metapopulationUSA_chainid1X2",
+    "I_HospitalHCW_metapopulationUSA_chainid1X3",
+    "I_HospitalPatient_metapopulationUK_chainid1X1",
+    "I_HospitalPatient_metapopulationUK_chainid1X2",
+    "I_HospitalPatient_metapopulationUK_chainid1X3",
+    "I_HospitalPatient_metapopulationUSA_chainid1X1",
+    "I_HospitalPatient_metapopulationUSA_chainid1X2",
+    "I_HospitalPatient_metapopulationUSA_chainid1X3",
+    "S_AgeYoung_metapopulationUK",
+    "R_AgeYoung_metapopulationUK",
+    "S_AgeOld_metapopulationUK",
+    "R_AgeOld_metapopulationUK",
+    "S_HospitalPatient_metapopulationUK",
+    "R_HospitalPatient_metapopulationUK",
+    "S_HospitalHCW_metapopulationUK",
+    "R_HospitalHCW_metapopulationUK",
+    "S_AgeYoung_metapopulationUSA",
+    "R_AgeYoung_metapopulationUSA",
+    "S_AgeOld_metapopulationUSA",
+    "R_AgeOld_metapopulationUSA",
+    "S_HospitalPatient_metapopulationUSA",
+    "R_HospitalPatient_metapopulationUSA",
+    "S_HospitalHCW_metapopulationUSA",
+    "R_HospitalHCW_metapopulationUSA"
   ),
   colors = colorRampPalette(RColorBrewer::brewer.pal(8, "Dark2"))(40)
 )

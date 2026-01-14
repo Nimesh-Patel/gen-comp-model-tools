@@ -62,19 +62,23 @@ load_all("compModels")
 #' @export
 #' @importFrom rlang .data
 define_currentstate <- function(outlist, namedvector = c()) {
+  # Identify which columns to remove if they exist
+  cols_to_remove <- c("interactionscale", "transitionscale", "environment_names") # nolint
+  existing_cols <- names(outlist$modelinstructions$tblupdatedstates)
+  cols_to_remove <- intersect(cols_to_remove, existing_cols)
+
   tblupdatestate <- tibble::tibble(
     updatedstate =
       outlist$modeloutstructions$updatedstates
   ) |>
-    dplyr::left_join(outlist$modelinstructions$tblupdatedstates |>
-      dplyr::select(
-        -.data$interactionscale,
-        -.data$transitionscale,
-        -.data$environment_names
-      ) |>
-      dplyr::distinct(.data$updatedstate,
-        .keep_all = TRUE
-      ), by = "updatedstate")
+    dplyr::left_join(
+      outlist$modelinstructions$tblupdatedstates |>
+        dplyr::select(-dplyr::all_of(cols_to_remove)) |>
+        dplyr::distinct(.data$updatedstate,
+          .keep_all = TRUE
+        ),
+      by = "updatedstate"
+    )
   tblout <- tblupdatestate |> dplyr::mutate(X0 = 0)
   if (length(namedvector) > 0) {
     currstates <- tblupdatestate |>

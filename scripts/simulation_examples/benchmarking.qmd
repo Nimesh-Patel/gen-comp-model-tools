@@ -10,7 +10,7 @@ code-fold: true
 
 ```{r packages}
 library(microbenchmark)
-devtools::load_all("../compModels")
+devtools::load_all("../../compModels")
 ```
 
 ## Motivation
